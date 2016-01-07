@@ -12,7 +12,7 @@ Create Date: 7th Jan 2016
 FILE_PREFIX = "wiki_"
 INPUT_FILE_POSTFIX = ".cln"
 OUTPUT_FILE_POSTFIX = ".clean"
-FILE_COUNTS = 72
+FILE_COUNTS = 10
 DEBUG = 0
 def clean_file( file_name ):
 #input progress
@@ -47,7 +47,7 @@ if __name__ == "__main__":
     print "Main-Process starts"
     pool = multiprocessing.Pool(processes=5)
     if DEBUG:
-        FILE_COUNTS = 1
+        FILE_COUNTS = 72
     for i in range(0, FILE_COUNTS + 1):
         if i < 10:
             file_name = FILE_PREFIX + "0" + str(i)
