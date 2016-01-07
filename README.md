@@ -9,5 +9,5 @@ STEPS:
 CORPUS:
 1. splited_cleaned_corpus.tar.gz contains all corpus followed by all 3 steps. It contains wiki_NUM.cln.clean, NUM from [0,10]
 2. splited_original_corpus_wiki151201.tar.gz contains all original corpus directly extracted from wikipedia's dump.
-3. wiki151201 contains all documents in (2), emerged into one file.
-4. wiki151201.clean contains all documents in (1), emerged into one file.
+3. wiki151201 contains all documents in (2), emerged into one file. Compressed file for it is wiki151201.tar.gz
+4. wiki151201.clean contains all documents in (1), emerged into one file. Compressed file for it is wiki151201.clean.tar.gz
