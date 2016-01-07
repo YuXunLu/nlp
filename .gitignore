@@ -1,3 +1,7 @@
 wiki_*
 *.bz2
 *.tar.gz
+#Files cleaned by python (step 2)
+*.clean
+#Files cleaned by bash (step 1)
+*.c
