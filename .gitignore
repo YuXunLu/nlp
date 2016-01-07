@@ -4,4 +4,4 @@ wiki_*
 #Files cleaned by python (step 2)
 *.clean
 #Files cleaned by bash (step 1)
-*.c
+*.cln
