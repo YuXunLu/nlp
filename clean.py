@@ -9,6 +9,8 @@ This file is used to clean corpus by following steps:
 Create Date: 7th Jan 2016
 """
 FILE_PREFIX = "wiki_"
+INPUT_FILE_POSTFIX = ".cln"
+OUTPUT_FILE_POSTFIX = ".clean"
 FILE_COUNTS = 72
 DEBUG = 1
 def clean_file( file_name ):
@@ -34,7 +36,7 @@ def clean_file( file_name ):
 
     target_file.close()
 #output progress
-    output_file_name = file_name + ".clean"
+    output_file_name = file_name + OUTPUT_FILE_POSTFIX
     output_file = open(output_file_name, "w")
     output_file.write(corpus_filtered)
     output_file.close()
@@ -46,6 +48,7 @@ if __name__ == "__main__":
             file_name = FILE_PREFIX + "0" + str(i)
         else:
             file_name = FILE_PREFIX + str(i)
+        file_name = file_name + INPUT_FILE_POSTFIX
         if DEBUG:
             print file_name
         clean_file(file_name)
