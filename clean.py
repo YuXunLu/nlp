@@ -17,9 +17,7 @@ def clean_file( file_name ):
 #input progress
     target_file = open(file_name, 'r')
     corpus_origin = target_file.read()
-    #0. Remove <doc id=.....> and </doc> marks
-    corpus_origin = re.sub("\b<doc.*\b>]", " ", corpus_origin)
-    corpus_origin = re.sub("\b</doc>]", " ", corpus_origin)
+
     #1. Remove all non-letter symbols.
 
     corpus_origin = re.sub("[^a-zA-Z]"," ", corpus_origin)
