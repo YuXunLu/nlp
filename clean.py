@@ -8,10 +8,7 @@ This file is used to clean corpus by following steps:
     3. remove all stop words.
 Create Date: 7th Jan 2016
 """
-FILE_PREFIX = "wiki_"
-INPUT_FILE_POSTFIX = ".cln"
-OUTPUT_FILE_POSTFIX = ".clean"
-FILE_COUNTS = 72
+
 DEBUG = 0
 def clean_file( file_name ):
 #input progress
@@ -39,14 +36,5 @@ def clean_file( file_name ):
     output_file.write(corpus_filtered)
     output_file.close()
 if __name__ == "__main__":
-    if DEBUG:
-        FILE_COUNTS = 1
-    for i in range(0, FILE_COUNTS + 1):
-        if i < 10:
-            file_name = FILE_PREFIX + "0" + str(i)
-        else:
-            file_name = FILE_PREFIX + str(i)
-        file_name = file_name + INPUT_FILE_POSTFIX
-        if DEBUG:
-            print file_name
-        clean_file(file_name)
+    file_name = "wiki151201"
+    clean_file(file_name)
