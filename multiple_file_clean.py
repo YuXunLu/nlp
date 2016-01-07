@@ -12,8 +12,8 @@ Create Date: 7th Jan 2016
 FILE_PREFIX = "wiki_"
 INPUT_FILE_POSTFIX = ".cln"
 OUTPUT_FILE_POSTFIX = ".clean"
-FILE_COUNTS = 10
-DEBUG = 1
+FILE_COUNTS = 72
+DEBUG = 0
 def clean_file( file_name ):
 #input progress
     print "[INPUT STAGE] Filename:" + file_name
@@ -44,10 +44,11 @@ def clean_file( file_name ):
     output_file.write(corpus_filtered)
     output_file.close()
 if __name__ == "__main__":
-    pool = multiprocessing.Pool()
+    print "Main-Process starts"
+    pool = multiprocessing.Pool(processes=5)
     if DEBUG:
         FILE_COUNTS = 1
-    for i in xrange(0, FILE_COUNTS + 1, 1):
+    for i in range(0, FILE_COUNTS + 1):
         if i < 10:
             file_name = FILE_PREFIX + "0" + str(i)
         else:
@@ -55,6 +56,8 @@ if __name__ == "__main__":
         file_name = file_name + INPUT_FILE_POSTFIX
         if DEBUG:
             print file_name
-        pool.apply_async( clean_file, args=(file_name) )
+        pool.apply_async( clean_file, (file_name,) )
     pool.close()
     pool.join()
+    print "Sub-process(es) done."
+    print "Main-process done."
