@@ -11,3 +11,5 @@ CORPUS:
 2. splited_original_corpus_wiki151201.tar.gz contains all original corpus directly extracted from wikipedia's dump.
 3. wiki151201 contains all documents in (2), emerged into one file. Compressed file for it is wiki151201.tar.gz
 4. wiki151201.clean contains all documents in (1), emerged into one file. Compressed file for it is wiki151201.clean.tar.gz
+
+LOCALIZED
