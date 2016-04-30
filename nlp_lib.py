@@ -1,18 +1,22 @@
 #!/usr/bin/env python
 # vim: tabstop=8 expandtab shiftwidth=4 softtabstop=4
 from nltk.corpus import wordnet as wn
-DEBUG = 1 #CONTROL DEBUG MODE
+DEBUG = 0 #CONTROL DEBUG MODE
 def read_word_vectors(filename, split_tag = " "):
     word_vector = {}
     vec_file = open(filename, "r")
     for line in vec_file:
         vec = line.split(split_tag)
         word_text = vec[0]
-        word_vector[ word_text ] = vec[1:]
+        if vec[-1] != "\n":
+            word_vector[ word_text ] = vec[1:]
+        else:
+            word_vector[ word_text ] = vec[1:-1]
         if DEBUG:
             print "[WORD]:", word_text
             print "[WORD_VECTOR]:", word_vector[word_text]
             print "[WORD_VEC_LENGTH]:", len(word_vector[word_text])
+    map(float,word_vector)
     return word_vector
 def read_synonyms(word):
     result = []
@@ -43,4 +47,5 @@ if __name__ == "__main__":
 #This part should never be reached unless u are in debug mode.
     word = "dog"
     test_synonym[word] = read_hyponyms(word)
-    print test_synonym
+    word_vector = read_word_vectors("./test_vector/100_3.vec")
+    print word_vector["dog"]
