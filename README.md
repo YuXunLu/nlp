@@ -16,3 +16,5 @@ H28 May 28th,:
 Project reopen for my essay on NAIST.
 
 sed "\<doc\d;\doc>\d" wiki151201 - command used to clean wiki151201
+
+there are 48 different words in R&G-65
