@@ -10,8 +10,8 @@ word_hypernyms = {}
 word_hyponyms = {}
 word_synonyms = {}
 #CNN part
-weight_convolution = []
-bias_vector = []
+weight_convolution = np.identity( 3, np.float64)
+bias_vector = np.zeros( (1, word_vector_dim), np.float64)
 def lost_function(vx,vy,score):
     return 0.0
 def cnn_calc(w1,w2):
@@ -30,9 +30,11 @@ def cnn_calc(w1,w2):
             #must find a hypernym
             while( not (word_vectors.has_key(w1_hypernym) and i < len(word_hypernyms[w1]) ) ):
                 i = i + 1
+                if (i > len(word_hypernyms[w1]) ):
+                        break;
                 w1_hypernym = word_hypernyms[w1][i]
             #if we didn't find any hypernym
-            if ( i > len(word_hypernyms) ):
+            if ( i > len(word_hypernyms[w1]) ):
                 break
             else: #we got a hypernym
                 feature_map.append( word_vectors[w1_hypernym] )
@@ -41,8 +43,10 @@ def cnn_calc(w1,w2):
             #must find a synonym
             while( not (word_vectors.has_key(w1_synonym) and j < len(word_synonyms[w1]) ) ):
                 j = j + 1
+                if (j > len(word_synonyms[w1]) ):
+                        break
                 w1_synonym = word_synonyms[w1][j]
-            if ( j > len(word_synonyms) ):
+            if ( j > len(word_synonyms[w1]) ):
                 berak;
             else:
                 feature_map.append( word_vectors[w1_synonym] )
@@ -51,8 +55,12 @@ def cnn_calc(w1,w2):
             #must find a hyponym
             while( not(word_vectors.has_key(w1_hyponym) and k < len(word_hyponyms[w1]) )):
                 k = k + 1
+                if ( k > len(word_hyponyms[w1] ) ):
+                    break
+                print "k",k
+                print "hypon num",len(word_hyponyms[w1])
                 w1_hyponym = word_hyponyms[w1][k]
-            if ( k > len(word_hyponyms) ):
+            if ( k > len(word_hyponyms[w1]) ):
                 break;
             else:
                 feature_map.append (word_vectors[w1_hyponym] )
@@ -70,21 +78,26 @@ def cnn_calc(w1,w2):
             node_feature[1] = feature_map[i+1]
             node_feature[2] = feature_map[i+2]
             #convolution
-            ADD_VEC = np.ones( (1,3), np.float64 )
+            ADD_VEC = np.array( [1,1,1], np.float64 )
             #shape
-            print "shape ADD_VEC", ADD_VEC.shape()
-            print "shape weight conv", weight_convolution.shape()
-            print "node_feature", node_feature.shape()
-            print "bias_vector", bias_vector.shape()
-            this_node_result = np.add( np.dot(ADD_VEC, np.dot(weight_convolution, node_feature)) , bias_vector)
+#            print "shape ADD_VEC", ADD_VEC.shape()
+#            print "shape weight conv", weight_convolution.shape()
+#            print "node_feature", node_feature.shape()
+#            print "bias_vector", bias_vector.shape()
+            print weight_convolution
+            print node_feature
+            result1 = np.dot(weight_convolution, node_feature)
+            result2 = np.dot(ADD_VEC, result1)
+            result3 = np.add(result2, bias_vector)
+            this_node_result = result3
             convolution_result.append(this_node_result)
             i = i + 1
     else:
         print "warning, convolution nodes insufficient","[word]:", w1
-        return np.zeros( (3, word_vector_dim), np.float64 )
+        return np.zeros( (1, word_vector_dim), np.float64 )
     #STEP 3: POOLING
     print "pooling"
-    final_vector = np.zeros( (3, word_vector_dim), np.float64 )
+    final_vector = np.zeros( (1, word_vector_dim), np.float64 )
     conv_nodes_N = np.array(conv_nodes_num, np.float64)
     for v in convolution_result:
         final_vector = np.add(final_vector, v)
@@ -93,8 +106,8 @@ def cnn_calc(w1,w2):
     return final_vector, feature_map
 def cnn_training():
     #initialize weight matrix and bias vector there!
-    weight_matrix = np.identity( 3, np.float64 )
-    bias_vector = np.zeros( (1, word_vector_dim), np.float64)
+    #weight_convolution = np.identity( 3, np.float64 )
+    #bias_vector = np.zeros( (1, word_vector_dim), np.float64)
     print "Training."
     for word_pairs in word_pair_score:
         word_1 = word_pairs[0]
