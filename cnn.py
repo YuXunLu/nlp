@@ -50,7 +50,7 @@ def compute_w_gradient(vx, vy, df_dw, dg_dw):
 
     factor1 = 1.0/(vx_len * vx_len * vy_len)
     gradient = (df_dw * g - f * dg_dw) * factor1
-    return 0.0
+    return gradient
 def update_parameters(bias, weight, feature_map, vx, vy):
     vx_len = np.dot(vx, np.transpose(vx) )
     vy_len = np.dot(vy, np.transpose(vy) )
@@ -96,7 +96,7 @@ def cnn_calc(w1,w2):
     hyponym_features = []
     synonym_features = []
     #STEP 1: BUILDING FEATURE MAP, width = 3
-    print "Build feature map"
+#    print "Build feature map"
     if (word_hypernyms.has_key(w1) ):
         for w in word_hypernyms[w1]:
             if (word_vectors.has_key(w) ):
@@ -125,7 +125,7 @@ def cnn_calc(w1,w2):
             break
         i = i + 1
     #STEP 2: CONVOLUTION STAGE
-    print "convolution"
+#    print "convolution"
     if ( len(feature_map) >= 3 ):
         #at least 3 nodes in feature map, which correspondent to a convolutional layer node
         conv_nodes_num = len(feature_map) - 2 # convolution nodes number
@@ -148,7 +148,7 @@ def cnn_calc(w1,w2):
 #        print "warning, convolution nodes insufficient","[word]:", w1
         return np.zeros( (1, word_vector_dim), np.float64 ), feature_map
     #STEP 3: POOLING
-    print "pooling"
+#    print "pooling"
     final_vector = np.zeros( (1, word_vector_dim), np.float64 )
     conv_nodes_N = np.array(conv_nodes_num, np.float64)
     for v in convolution_result:
@@ -187,7 +187,7 @@ def cnn_training():
                     bias, weight = update_parameters(bias_vector, weight_convolution, f_map, v_star, word_vectors[word_2])
                     bias_vector = bias
                     weight_convolution = weight
-        if (sum_error < former_sum_error):
+        if (sum_error <= former_sum_error):
             down_time = down_time + 1
             learning_rate = learning_rate + 0.05
         else:
