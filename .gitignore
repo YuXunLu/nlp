@@ -5,3 +5,4 @@ wiki_*
 *.clean
 #Files cleaned by bash (step 1)
 *.cln
+test_vector/
