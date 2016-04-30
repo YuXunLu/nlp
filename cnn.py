@@ -10,6 +10,7 @@ word_hyponyms = {}
 word_synonyms = {}
 #CNN part
 weight_convolution = []
+bias_vector = []
 def lost_function(vx,vy,score):
     return 0.0
 def cnn_calc(w1,w2,score):
@@ -18,7 +19,8 @@ def cnn_calc(w1,w2,score):
     j = 0
     k = 0
     s = score
-    feature_maps = []
+    feature_map = []
+    #STEP 1: BUILDING FEATURE MAP, width = 3
     if (word_hypernyms.has_key(w1) && word_synonyms.has_key(w1) && word_hyponyms.has_key(w1) ):
         while ( i < len(word_hypernyms[w1]) and j < len(word_synonyms[w1]) and k < len(word_hyponyms[w1] )):
             w1_hypernym = word_hypernyms[w1][i]
@@ -26,6 +28,26 @@ def cnn_calc(w1,w2,score):
             w1_hyponym = word_hyponyms[w1][k]
             feature_node = np.array( zeros(3,word_vector_dim) )
             if ( word_vectors.has_key(w1_hypernym) ):
+                feature_node[1] = word_vectors[w1_hypernym]
+                if (word_vectors.has_key(w1_synonym) ):
+                    feature_node[2] = word_vectors[w1_synonym]
+                    if ( word_vectors.has_key(w1_hyponym) ):
+                        feature_node[3] = word_vectors[w1_hyponym]
+                        feature_map.add(feature_node)
+                        feature_node = np.array( zeros(3,word_vector_dim) )
+                        i = i + 1
+                        j = j + 1
+                        k = k + 1
+                    else:
+                        k = k + 1
+                else:
+                    j = j + 1
+            else:
+                i = i + 1
+    #STEP 2: CONVOLUTION STAGE
+    if ( len(feature_map) >= 3 ):
+        #at least 3 nodes in feature map, which correspondent to a convolutional layer node
+
 
 def cnn_training():
     for word_pairs in word_pair_score:
