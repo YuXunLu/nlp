@@ -14,10 +14,33 @@ def read_word_vectors(filename, split_tag = " "):
             print "[WORD_VECTOR]:", word_vector[word_text]
             print "[WORD_VEC_LENGTH]:", len(word_vector[word_text])
     return word_vector
-    #Testing part, plz do not care about it
+def read_synonyms(word):
+    result = []
+    word_synsets = wn.synsets(word)
+    for w in word_synsets:
+        for lemma in w.lemmas():
+            result.append(lemma.name())
+    return result
+def read_hypernyms(word):
+    result = []
+    word_synsets = wn.synsets(word)
+    for w in word_synsets:
+        for hyper in w.hypernyms():
+            for l in hyper.lemmas():
+                result.append(l.name())
+    return result
+def read_hyponyms(word):
+    result = []
+    word_synsets = wn.synsets(word)
+    for w in word_synsets:
+        for hypon in w.hyponyms():
+            for l in hypon.lemmas():
+                result.append(l.name())
+    return result
+#Testing part, plz do not care about it
+test_synonym = {}
 if __name__ == "__main__":
-#THIS FUNCTION SHALL NEVER BE ENTERED UNLESS YOU ARE IN DEBUGGING MODE
-    if DEBUG:
-        vector_file_name = "./test_vector/100_3.vec"
-    word_v = read_word_vectors(vector_file_name)
-    print word_v
+#This part should never be reached unless u are in debug mode.
+    word = "dog"
+    test_synonym[word] = read_hyponyms(word)
+    print test_synonym
