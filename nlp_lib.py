@@ -1,17 +1,14 @@
 #!/usr/bin/env python
 # vim: tabstop=8 expandtab shiftwidth=4 softtabstop=4
 from nltk.corpus import wordnet as wn
-DEBUG = 0 #CONTROL DEBUG MODE
+DEBUG = 1 #CONTROL DEBUG MODE
 def read_word_vectors(filename, split_tag = " "):
     word_vector = {}
     vec_file = open(filename, "r")
     for line in vec_file:
         vec = line.split(split_tag)
         word_text = vec[0]
-        if vec[-1] != "\n":
-            word_vector[ word_text ] = vec[1:]
-        else:
-            word_vector[ word_text ] = vec[1:-1]
+        word_vector[word_text] = vec[1:-1]
         if DEBUG:
             print "[WORD]:", word_text
             print "[WORD_VECTOR]:", word_vector[word_text]
