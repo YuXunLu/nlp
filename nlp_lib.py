@@ -2,7 +2,7 @@
 # vim: tabstop=8 expandtab shiftwidth=4 softtabstop=4
 from nltk.corpus import wordnet as wn
 import numpy as np
-DEBUG = 1 #CONTROL DEBUG MODE
+DEBUG = 0 #CONTROL DEBUG MODE
 def read_csv(filename, split_tag = ","):
     word_csv = []
     csv_file = open(filename,"r")
@@ -51,6 +51,10 @@ def read_hyponyms(word):
 test_synonym = {}
 if __name__ == "__main__":
 #This part should never be reached unless u are in debug mode.
-#    word_vec = read_csv("./csv/R&G-65.csv")
-#    print word_vec
-    word_vec = read_word_vectors("./test_vector/100_3.vec")
+    word_vec = read_csv("./csv/R&G-65.csv")
+    print word_vec
+    for w in word_vec:
+        print "w0",w[0]
+        print "w1",w[1]
+        print "w2",w[2]
+#    word_vec = read_word_vectors("./test_vector/100_3.vec")
