@@ -13,7 +13,7 @@ word_synonyms = {}
 #CNN part
 weight_convolution = np.random.rand(3,3)
 bias_vector = np.random.rand(word_vector_dim)
-learning_rate = 0.01
+learning_rate = 0.001
 def df_dw(feature_map, vy, row_num):
     gradient = 0.0
     k = 0
@@ -85,7 +85,7 @@ def update_parameters(final_score, human_score , bias, weight, feature_map, vx, 
     vx_len = np.sqrt(vx_len)
     vy_len = np.sqrt(vy_len)
     
-    factor0 = np.abs((final_score + 1.0 - human_score))
+    factor0 = np.abs((final_score - human_score * 0.2))
 
     factor1 = 1.0/(vx_len * vx_len * vy_len)
 
@@ -128,10 +128,10 @@ def lost_function(vx,vy,score):
     vx_len = np.sqrt(vx_len)
     vy_len = np.sqrt(vy_len)
     bottom = vx_len*vy_len
-    final_score = (dot_prod / bottom)
+    final_score = np.abs( (dot_prod / bottom) )
 #    print "[final_score]", final_score
 #    print "[human_score", score/5.0
-    lost_result = 1.0/2.0 * ( final_score + 1.0 - score/(5.0) ) * ( final_score + 1.0 - score/(5.0) )
+    lost_result = 1.0/2.0 * ( ( final_score - score * 0.2 ) * ( final_score  - score * 0.2 ) )
     
     return lost_result, final_score
 def cnn_calc(w1,w2):
@@ -235,10 +235,10 @@ def cnn_training():
                     weight_convolution = weight
         if (sum_error <= former_sum_error):
             down_time = down_time + 1
-            learning_rate = learning_rate + 0.05
+            learning_rate = learning_rate + 0.005
         else:
             down_time = 0
-            learning_rate = learning_rate * 0.5
+            learning_rate = learning_rate - 0.003
         if (down_time >= 5):
             break
         print "this time error", sum_error
