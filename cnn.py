@@ -55,7 +55,7 @@ def compute_w_gradient(vx, vy, df_dw, dg_dw):
 def df_db(dim,vy):
     i = 0
     gradient = 0.0
-    while (word_vector_dim):
+    while (i < word_vector_dim):
         gradient = gradient + vy[dim]
         i = i + 1
     return gradient
