@@ -217,7 +217,6 @@ def cnn_training():
     sum_error = 0.0
     up_time = 0
     former_sum_error = 0.0
-    iteration_time = 0
     while ( 1 > 0 ):
         sum_error = 0.0
         machine_s = [] #store all result for pearson effi
@@ -248,10 +247,10 @@ def cnn_training():
         p_rel, p_val = sci.stats.pearsonr(human_s, machine_s) 
         if (sum_error >= former_sum_error):
             up_time = up_time + 1
-            learning_rate = learning_rate - 0.2
+#            learning_rate = learning_rate + 0.01
         else:
             up_time = 0
-            learning_rate = learning_rate + 0.3
+#            learning_rate = learning_rate - 0.005
         if (p_rel >= 80.0 and up_time == 1 ):
             break
         print "this time error", sum_error
@@ -259,8 +258,6 @@ def cnn_training():
         print "up_time",up_time
         print "learning_rate", learning_rate
         print "pearson",  sci.stats.pearsonr(human_s, machine_s)
-        print "iteration time", iteration_time
-        iteration_time = iteration_time + 1
         former_sum_error = sum_error
 if __name__=="__main__":
     print "read vector & score"
