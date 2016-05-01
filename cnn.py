@@ -85,7 +85,7 @@ def update_parameters(final_score, human_score , bias, weight, feature_map, vx, 
     vx_len = np.sqrt(vx_len)
     vy_len = np.sqrt(vy_len)
     
-    factor0 = np.abs((final_score - human_score))
+    factor0 = np.abs((final_score + 1.0 - human_score))
 
     factor1 = 1.0/(vx_len * vx_len * vy_len)
 
@@ -129,9 +129,9 @@ def lost_function(vx,vy,score):
     vy_len = np.sqrt(vy_len)
     bottom = vx_len*vy_len
     final_score = (dot_prod / bottom)
-    print "[final_score]", final_score
-    print "[human_score", score/5.0
-    lost_result = 1.0/2.0 * ( final_score - score/(5.0) ) * ( final_score - score/(5.0) )
+#    print "[final_score]", final_score
+#    print "[human_score", score/5.0
+    lost_result = 1.0/2.0 * ( final_score + 1.0 - score/(5.0) ) * ( final_score + 1.0 - score/(5.0) )
     
     return lost_result, final_score
 def cnn_calc(w1,w2):
@@ -228,27 +228,27 @@ def cnn_training():
                     machine_s.append(this_score[0][0])
                     human_s.append(score)
 
-                    print "[word pair]", word_1, word_2
+#                    print "[word pair]", word_1, word_2
                     
                     bias, weight = update_parameters(this_score,score,bias_vector, weight_convolution, f_map, v_star, word_vectors[word_2])
                     bias_vector = bias
                     weight_convolution = weight
         if (sum_error <= former_sum_error):
             down_time = down_time + 1
-            learning_rate = learning_rate + 0.5
+            learning_rate = learning_rate + 0.05
         else:
             down_time = 0
-            learning_rate = learning_rate - 0.3
+            learning_rate = learning_rate * 0.5
         if (down_time >= 5):
             break
         print "this time error", sum_error
         print "former time error", former_sum_error
-        print "down_time", down_time
-        print "weight mat", weight_convolution
-        print "bias vec", bias_vector
+#        print "down_time", down_time
+#        print "weight mat", weight_convolution
+#        print "bias vec", bias_vector
         print "learning_rate", learning_rate
-        print "human_s", human_s
-        print "machine_s", machine_s
+#        print "human_s", human_s
+#        print "machine_s", machine_s
         print "pearson",  sci.stats.pearsonr(human_s, machine_s)
         former_sum_error = sum_error
 if __name__=="__main__":
