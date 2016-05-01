@@ -251,7 +251,7 @@ def cnn_training():
         else:
             up_time = 0
 #            learning_rate = learning_rate - 0.005
-        if (p_rel >= 80.0 or up_time > 4 ):
+        if (p_rel >= 80.0 and up_time == 1 ):
             break
         print "this time error", sum_error
         print "former time error", former_sum_error
