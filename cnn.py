@@ -12,7 +12,7 @@ word_synonyms = {}
 #CNN part
 weight_convolution = np.identity( 3, np.float64)
 bias_vector = np.zeros( (1, word_vector_dim), np.float64)
-learning_rate = 0.1
+learning_rate = 0.01
 def df_dw(feature_map, vy, row_num):
     gradient = 0.0
     k = 0
@@ -189,15 +189,18 @@ def cnn_training():
                     weight_convolution = weight
         if (sum_error <= former_sum_error):
             down_time = down_time + 1
-            learning_rate = learning_rate + 0.05
+            learning_rate = learning_rate + 0.01
         else:
             down_time = 0
-            learning_rate = learning_rate - 0.03
+            learning_rate = learning_rate / 2.0
         if (down_time >= 5):
             break
         print "this time error", sum_error
         print "former time error", former_sum_error
         print "down_time", down_time
+        print "weight mat", weight_convolution
+        print "bias vec", bias_vector
+        print "learning_rate", learning_rate
         former_sum_error = sum_error
 if __name__=="__main__":
     print "read vector & score"
