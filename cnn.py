@@ -215,7 +215,7 @@ def cnn_training():
     global learning_rate
     print "Training."
     sum_error = 0.0
-    down_time = 0
+    up_time = 0
     former_sum_error = 0.0
     while ( 1 > 0 ):
         sum_error = 0.0
@@ -230,32 +230,32 @@ def cnn_training():
             v_star, f_map = cnn_calc(word_1,word_2) #v^* and feature map
             vy_star, f_map_y = cnn_calc(word_2,word_1)
             if ( len(f_map) >= 3 ): #must have sufficient feature maps
-                if (word_vectors.has_key(word_2) ):
+                if ( len(f_map_y) >= 3 ):
                                                                     #PROBLEM HERE!!!!!!ERUREKA! 
-                    lost_single, this_score = lost_function(v_star, word_vectors[word_2], score) #this_score is machine score for the wordpair this time.
+                    lost_single, this_score = lost_function(v_star, vy_star[0], score) #this_score is machine score for the wordpair this time.
                     sum_error = sum_error  + lost_single
                     machine_s.append(this_score[0][0])
                     human_s.append(score)
 
-                    
-                    tmp_grad_bias, tmp_grad_weight = update_parameters(this_score,score,bias_vector, weight_convolution, f_map, v_star, word_vectors[word_2])
+#                    print "vy",vy_star        
+                    tmp_grad_bias, tmp_grad_weight = update_parameters(this_score,score,bias_vector, weight_convolution, f_map, v_star,vy_star[0])
                     grad_bias = grad_bias + tmp_grad_bias
                     grad_weight = grad_weight + tmp_grad_weight
                 
         bias_vector = bias_vector - learning_rate * grad_bias
         weight_convolution = weight_convolution - learning_rate * grad_weight
-    
-        if (sum_error <= former_sum_error):
-            down_time = down_time + 1
+        p_rel, p_val = sci.stats.pearsonr(human_s, machine_s) 
+        if (sum_error >= former_sum_error):
+            up_time = up_time + 1
 #            learning_rate = learning_rate + 0.01
         else:
-            down_time = 0
+            up_time = 0
 #            learning_rate = learning_rate - 0.005
-        if (down_time >= 5):
+        if (p_rel >= 80.0 or up_time > 4 ):
             break
         print "this time error", sum_error
         print "former time error", former_sum_error
-        print "down_time", down_time
+        print "up_time",up_time
         print "learning_rate", learning_rate
         print "pearson",  sci.stats.pearsonr(human_s, machine_s)
         former_sum_error = sum_error
