@@ -13,7 +13,7 @@ word_synonyms = {}
 #CNN part
 weight_convolution = np.random.rand(3,3)
 bias_vector = np.random.rand(word_vector_dim)
-learning_rate = 0.5
+learning_rate = 0.01
 def df_dw(feature_map, vy, row_num):
     gradient = 0.0
     k = 0
@@ -40,7 +40,7 @@ def dg_dw(vx,feature_map,row_num):
         k = k + 1
     return gradient * vx_len
 
-def compute_w_gradient(vx, vy, df_dw, dg_dw, h_score):
+def compute_w_gradient(vx, vy, df_dw, dg_dw):
     vx_len = np.dot(vx, np.transpose(vx) )
     vy_len = np.dot(vy, np.transpose(vy) )
     vx_len = np.sqrt(vx_len)
@@ -48,11 +48,9 @@ def compute_w_gradient(vx, vy, df_dw, dg_dw, h_score):
 
     f = np.dot(vx, np.transpose(vy) )
     g = vx_len
-    
-    factor0 = f/(g * vy_len) - h_score
-    factor1 = 1.0/(vx_len * vx_len * vy_len)
 
-    gradient = (df_dw * g - f * dg_dw) * factor1 * factor0
+    factor1 = 1.0/(vx_len * vx_len * vy_len)
+    gradient = (df_dw * g - f * dg_dw) * factor1
     return gradient
 
 def df_db(dim,vy):
@@ -66,7 +64,7 @@ def dg_db(vx_len, n):
     gradient = n * vx_len
     return gradient
 
-def compute_b_gradient(vx, vy, df_db, dg_db, h_score):
+def compute_b_gradient(vx, vy, df_db, dg_db):
     vx_len = np.dot(vx, np.transpose(vx) )
     vy_len = np.dot(vy, np.transpose(vy) )
     vx_len = np.sqrt(vx_len)
@@ -75,10 +73,9 @@ def compute_b_gradient(vx, vy, df_db, dg_db, h_score):
     f = np.dot(vx, np.transpose(vy) )
     g = vx_len
 
-    factor0 = ( f / (g * vy_len) ) - h_score
     factor1 = 1.0/(vx_len * vx_len * vy_len)
     
-    gradient = factor0 * factor1 * ( df_db * g - f * dg_db )
+    gradient = factor1 * ( df_db * g - f * dg_db )
 
 
     return gradient
@@ -88,7 +85,7 @@ def update_parameters(final_score, human_score , bias, weight, feature_map, vx, 
     vx_len = np.sqrt(vx_len)
     vy_len = np.sqrt(vy_len)
     
-    factor0 = (final_score - human_score * 0.2)
+    factor0 = np.abs((final_score - human_score * 0.2))
 
     factor1 = 1.0/(vx_len * vx_len * vy_len)
 
@@ -101,17 +98,17 @@ def update_parameters(final_score, human_score , bias, weight, feature_map, vx, 
     dg_dw3 = dg_dw(vx, feature_map, 2)
 
     #update gradient for convolution_weight's each row
-    grad_w1 = compute_w_gradient(vx,vy,df_dw1,dg_dw1, human_score)
-    grad_w2 = compute_w_gradient(vx,vy,df_dw2,dg_dw2, human_score)
-    grad_w3 = compute_w_gradient(vx,vy,df_dw3,dg_dw3, human_score)
+    grad_w1 = compute_w_gradient(vx,vy,df_dw1,dg_dw1)
+    grad_w2 = compute_w_gradient(vx,vy,df_dw2,dg_dw2)
+    grad_w3 = compute_w_gradient(vx,vy,df_dw3,dg_dw3)
     
     grad_weight = np.zeros( (3,3), np.float64)
     
     i = 0
     while ( i < 3 ):
-        grad_weight[0][i] = grad_weight[0][i] + grad_w1
-        grad_weight[1][i] = grad_weight[1][i] + grad_w2
-        grad_weight[2][i] = grad_weight[2][i] + grad_w3
+        grad_weight[0][i] = grad_weight[0][i] + factor0 * learning_rate * grad_w1
+        grad_weight[1][i] = grad_weight[1][i] + factor0 * learning_rate * grad_w2
+        grad_weight[2][i] = grad_weight[2][i] + factor0 * learning_rate * grad_w3
         i = i + 1
     
     #update gradient for b, which is darned simpler.
@@ -123,7 +120,7 @@ def update_parameters(final_score, human_score , bias, weight, feature_map, vx, 
         dg_dbi = dg_db(vx_len, n)
 #        print "bias term"
 #        print bias
-        grad_bias[i] = grad_bias[i] + compute_b_gradient(vx,vy, df_dbi, dg_dbi,human_score)
+        grad_bias[i] = grad_bias[i] +  factor0 * learning_rate * compute_b_gradient(vx,vy, df_dbi, dg_dbi)
         i = i + 1
     
     return grad_bias, grad_weight
@@ -134,9 +131,9 @@ def lost_function(vx,vy,score):
     vx_len = np.sqrt(vx_len)
     vy_len = np.sqrt(vy_len)
     bottom = vx_len*vy_len
-    final_score =  (dot_prod / bottom)
+    final_score = np.abs( (dot_prod / bottom) )
 #    print "[final_score]", final_score
-#    print "[human_score", score * 0.2
+#    print "[human_score", score/5.0
     lost_result = 1.0/2.0 * ( ( final_score - score * 0.2 ) * ( final_score  - score * 0.2 ) )
     
     return lost_result, final_score
@@ -228,10 +225,9 @@ def cnn_training():
             word_2 = word_pairs[1]
             score = np.float32(float(word_pairs[2]))
             v_star, f_map = cnn_calc(word_1,word_2) #v^* and feature map
-            vy_star, f_map_y = cnn_calc(word_2,word_1)
             if ( len(f_map) >= 3 ): #must have sufficient feature maps
                 if (word_vectors.has_key(word_2) ):
-                                                                    #PROBLEM HERE!!!!!!ERUREKA! 
+                    
                     lost_single, this_score = lost_function(v_star, word_vectors[word_2], score) #this_score is machine score for the wordpair this time.
                     sum_error = sum_error  + lost_single
                     machine_s.append(this_score[0][0])
@@ -242,8 +238,8 @@ def cnn_training():
                     grad_bias = grad_bias + tmp_grad_bias
                     grad_weight = grad_weight + tmp_grad_weight
                 
-        bias_vector = bias_vector - learning_rate * grad_bias
-        weight_convolution = weight_convolution - learning_rate * grad_weight
+        bias_vector = bias_vector - grad_bias
+        weight_convolution = weight_convolution - grad_weight
     
         if (sum_error <= former_sum_error):
             down_time = down_time + 1

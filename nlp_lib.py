@@ -27,24 +27,24 @@ def read_word_vectors(filename, split_tag = " "):
             print "[WORD_VECTOR]:", word_vector[word_text]
             print "[WORD_VEC_LENGTH]:", len(word_vector[word_text])
     return word_vector
-def read_synonyms(word):
+def read_synonyms(word, pos = wn.NOUN):
     result = []
-    word_synsets = wn.synsets(word)
+    word_synsets = wn.synsets(word, pos)
     for w in word_synsets:
         for lemma in w.lemmas():
             result.append(lemma.name())
     return result
-def read_hypernyms(word):
+def read_hypernyms(word, pos = wn.NOUN):
     result = []
-    word_synsets = wn.synsets(word)
+    word_synsets = wn.synsets(word, pos)
     for w in word_synsets:
         for hyper in w.hypernyms():
             for l in hyper.lemmas():
                 result.append(l.name())
     return result
-def read_hyponyms(word):
+def read_hyponyms(word, pos = wn.NOUN):
     result = []
-    word_synsets = wn.synsets(word)
+    word_synsets = wn.synsets(word, pos)
     for w in word_synsets:
         for hypon in w.hyponyms():
             for l in hypon.lemmas():

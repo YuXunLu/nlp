@@ -8,11 +8,11 @@ word_hypernyms = {}
 word_hyponyms = {}
 word_fin_vector  = {}
 word_synsets = {}
-origin_vector_file_prefix = "./word2phrase_origin/vectors_origin_"
-target_file = "R&G-65.csv"
+origin_vector_file_prefix = "./test_vector/"
+target_file = "./csv/R&G-65.csv"
 vector_file_path = "./gloss_vectors/"
-DIMENSIONS = ['100','200','300','400','500','600','700']
-WINDOWS = ['3','4','5','6','7','8']
+DIMENSIONS = ['100']
+WINDOWS = ['3']
 word_list = []
 word_vector = {}
 word_synsets = {}
@@ -36,7 +36,7 @@ if __name__ == "__main__":
         for window in WINDOWS:
             word_vector = {}
             word_fin_vector = {}
-            dest_vector_file = origin_vector_file_prefix + dim + "_" + window
+            dest_vector_file = origin_vector_file_prefix + dim + "_" + window + ".vec"
             pf.read_wordvector(word_vector, dest_vector_file)
             output_name = target_file + "-" + dim + "_" + window + ".res"
 ####Processing Stage ####
