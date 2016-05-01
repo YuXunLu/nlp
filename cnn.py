@@ -51,6 +51,33 @@ def compute_w_gradient(vx, vy, df_dw, dg_dw):
     factor1 = 1.0/(vx_len * vx_len * vy_len)
     gradient = (df_dw * g - f * dg_dw) * factor1
     return gradient
+
+def df_db(dim,vy):
+    i = 0
+    gradient = 0.0
+    while (word_vector_dim):
+        gradient = gradient + vy[dim]
+        i = i + 1
+    return gradient
+def dg_db(vx_len, n):
+    gradient = n * vx_len
+    return gradient
+
+def compute_b_gradient(vx, vy, df_db, dg_db):
+    vx_len = np.dot(vx, np.transpose(vx) )
+    vy_len = np.dot(vy, np.transpose(vy) )
+    vx_len = np.sqrt(vx_len)
+    vy_len = np.sqrt(vy_len)
+
+    f = np.dot(vx, np.transpose(vy) )
+    g = vx_len
+
+    facator1 = 1.0/(vx_len * vx_len * vy_len)
+    
+    gradient = factor1 * ( df_db * g - f * dg_db )
+
+
+    return gradient
 def update_parameters(bias, weight, feature_map, vx, vy):
     vx_len = np.dot(vx, np.transpose(vx) )
     vy_len = np.dot(vy, np.transpose(vy) )
@@ -78,7 +105,16 @@ def update_parameters(bias, weight, feature_map, vx, vy):
         weight[1,i] = weight[1,i] - learning_rate * grad_w2
         weight[2,i] = weight[2,i] - learning_rate * grad_w3
         i = i + 1
+    
     #update gradient for b, which is darned simpler.
+    n = len(feature_map) - 2.0
+    i = 0
+    while ( i < word_vector_dim):
+        df_dbi = df_db(i, vy)
+        dg_dbi = dg_db(vx_len, n)
+        bias[i] = bias[i] - learning_rate * compute_b_gradient(vx,vy, df_dbi, dg_dbi)
+        i = i + 1
+    
     return bias, weight
 def lost_function(vx,vy,score):
     dot_prod = np.dot(vx, np.transpose(vy) )
