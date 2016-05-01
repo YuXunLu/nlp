@@ -211,12 +211,10 @@ def cnn_training():
     sum_error = 0.0
     down_time = 0
     former_sum_error = 0.0
-    human_s = []
-    for w_pairs in word_pair_score:
-        human_s.append( float(w_pairs[2]))
     while ( 1 > 0 ):
         sum_error = 0.0
         machine_s = [] #store all result for pearson effi
+        human_s = []
         for word_pairs in word_pair_score:
             word_1 = word_pairs[0]
             word_2 = word_pairs[1]
@@ -227,7 +225,8 @@ def cnn_training():
                     
                     lost_single, this_score = lost_function(v_star, word_vectors[word_2], score) #this_score is machine score for the wordpair this time.
                     sum_error = sum_error  + lost_single
-                    machine_s.append(this_score)
+                    machine_s.append(this_score[0][0])
+                    human_s.append(score)
 
                     print "[word pair]", word_1, word_2
                     
@@ -248,6 +247,8 @@ def cnn_training():
         print "weight mat", weight_convolution
         print "bias vec", bias_vector
         print "learning_rate", learning_rate
+        print "human_s", human_s
+        print "machine_s", machine_s
         print "pearson",  sci.stats.pearsonr(human_s, machine_s)
         former_sum_error = sum_error
 if __name__=="__main__":
