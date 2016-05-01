@@ -1,6 +1,7 @@
 from nltk.corpus import wordnet as wn
 import nlp_lib as nlplib
 import numpy as np
+import scipy as sci
 word_vectors = {}
 new_word_vectors = {}
 word_vector_dim = 100
@@ -210,9 +211,12 @@ def cnn_training():
     sum_error = 0.0
     down_time = 0
     former_sum_error = 0.0
+    human_s = []
+    for w_pairs in word_pair_score:
+        human_s.append( float(w_pairs[2]))
     while ( 1 > 0 ):
         sum_error = 0.0
-        this_result_all = []
+        machine_s = [] #store all result for pearson effi
         for word_pairs in word_pair_score:
             word_1 = word_pairs[0]
             word_2 = word_pairs[1]
@@ -221,9 +225,9 @@ def cnn_training():
             if ( len(f_map) >= 3 ): #must have sufficient feature maps
                 if (word_vectors.has_key(word_2) ):
                     
-                    lost_single, this_score = lost_function(v_star, word_vectors[word_2], score)
+                    lost_single, this_score = lost_function(v_star, word_vectors[word_2], score) #this_score is machine score for the wordpair this time.
                     sum_error = sum_error  + lost_single
-                    
+                    machine_s.append(this_score)
 
                     print "[word pair]", word_1, word_2
                     
@@ -244,6 +248,7 @@ def cnn_training():
         print "weight mat", weight_convolution
         print "bias vec", bias_vector
         print "learning_rate", learning_rate
+        print "pearson",  sci.stats.pearsonr(human_s, machine_s)
         former_sum_error = sum_error
 if __name__=="__main__":
     print "read vector & score"
