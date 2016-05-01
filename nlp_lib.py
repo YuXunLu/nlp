@@ -1,8 +1,26 @@
 #!/usr/bin/env python
 # vim: tabstop=8 expandtab shiftwidth=4 softtabstop=4
 from nltk.corpus import wordnet as wn
+import scipy as sci
 import numpy as np
 DEBUG = 0 #CONTROL DEBUG MODE
+
+#word_pair_score1: human judged
+#word_pair_score2: machine judged
+
+def pearson_co(word_pair_score1, word_pair_score2):
+    result = 0.0
+    w1_score = []
+    w2_score = []
+    for pair1 in word_pair_score1:
+        for pair2 in word_pair_score2:
+            if ( (pair1[0] == pair2[0]) and (pair1[1] == pair2[1]) ):
+                #the w1,w2 and w1*, w2* are same.
+                w1_score.append( float(pair1[2]) )
+                w2_score.append( pair2[2] )
+                break
+    result = sci.stats.pearsonr(w1_score, w2_score)
+    return result
 def read_csv(filename, split_tag = ","):
     word_csv = []
     csv_file = open(filename,"r")

@@ -78,11 +78,13 @@ def compute_b_gradient(vx, vy, df_db, dg_db):
 
 
     return gradient
-def update_parameters(bias, weight, feature_map, vx, vy):
+def update_parameters(final_score, human_score , bias, weight, feature_map, vx, vy):
     vx_len = np.dot(vx, np.transpose(vx) )
     vy_len = np.dot(vy, np.transpose(vy) )
     vx_len = np.sqrt(vx_len)
     vy_len = np.sqrt(vy_len)
+    
+    factor0 = np.abs((final_score - human_score))
 
     factor1 = 1.0/(vx_len * vx_len * vy_len)
 
@@ -101,9 +103,9 @@ def update_parameters(bias, weight, feature_map, vx, vy):
     
     i = 0
     while ( i < 3 ):
-        weight[0,i] = weight[0,i] - learning_rate * grad_w1
-        weight[1,i] = weight[1,i] - learning_rate * grad_w2
-        weight[2,i] = weight[2,i] - learning_rate * grad_w3
+        weight[0,i] = weight[0,i] - factor0 * learning_rate * grad_w1
+        weight[1,i] = weight[1,i] - factor0 * learning_rate * grad_w2
+        weight[2,i] = weight[2,i] - factor0 * learning_rate * grad_w3
         i = i + 1
     
     #update gradient for b, which is darned simpler.
@@ -114,7 +116,7 @@ def update_parameters(bias, weight, feature_map, vx, vy):
         dg_dbi = dg_db(vx_len, n)
 #        print "bias term"
 #        print bias
-        bias[i] = bias[i] - learning_rate * compute_b_gradient(vx,vy, df_dbi, dg_dbi)
+        bias[i] = bias[i] - factor0 * learning_rate * compute_b_gradient(vx,vy, df_dbi, dg_dbi)
         i = i + 1
     
     return bias, weight
@@ -126,8 +128,11 @@ def lost_function(vx,vy,score):
     vy_len = np.sqrt(vy_len)
     bottom = vx_len*vy_len
     final_score = (dot_prod / bottom)
-    lost_result = np.abs( final_score - score/(5.0) )
-    return lost_result
+    print "[final_score]", final_score
+    print "[human_score", score/5.0
+    lost_result = 1.0/2.0 * ( final_score - score/(5.0) ) * ( final_score - score/(5.0) )
+    
+    return lost_result, final_score
 def cnn_calc(w1,w2):
     feature_map = []
     hypernym_features = []
@@ -214,23 +219,21 @@ def cnn_training():
             v_star, f_map = cnn_calc(word_1,word_2) #v^* and feature map
             if ( len(f_map) >= 3 ): #must have sufficient feature maps
                 if (word_vectors.has_key(word_2) ):
-#                    print "w1",word_1
-#                    print "w2",word_2
-#                    print "lost"
-                    lost_single = lost_function(v_star, word_vectors[word_2], score)
+                    
+                    lost_single, this_score = lost_function(v_star, word_vectors[word_2], score)
                     sum_error = sum_error  + lost_single
-#                    print "lost_single", lost_single
-#                    print "accumulated_error", sum_error
-#                    print "Updating parameters"
-                    bias, weight = update_parameters(bias_vector, weight_convolution, f_map, v_star, word_vectors[word_2])
+
+                    print "[word pair]", word_1, word_2
+                    
+                    bias, weight = update_parameters(this_score,score,bias_vector, weight_convolution, f_map, v_star, word_vectors[word_2])
                     bias_vector = bias
                     weight_convolution = weight
         if (sum_error <= former_sum_error):
             down_time = down_time + 1
-            learning_rate = learning_rate + 0.01
+            learning_rate = learning_rate + 0.5
         else:
             down_time = 0
-            learning_rate = learning_rate / 2.0
+            learning_rate = learning_rate - 0.3
         if (down_time >= 5):
             break
         print "this time error", sum_error
