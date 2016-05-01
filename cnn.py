@@ -212,6 +212,7 @@ def cnn_training():
     former_sum_error = 0.0
     while ( 1 > 0 ):
         sum_error = 0.0
+        this_result_all = []
         for word_pairs in word_pair_score:
             word_1 = word_pairs[0]
             word_2 = word_pairs[1]
@@ -222,6 +223,7 @@ def cnn_training():
                     
                     lost_single, this_score = lost_function(v_star, word_vectors[word_2], score)
                     sum_error = sum_error  + lost_single
+                    
 
                     print "[word pair]", word_1, word_2
                     
