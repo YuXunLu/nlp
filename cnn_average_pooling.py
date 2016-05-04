@@ -248,10 +248,10 @@ def cnn_training():
         p_rel, p_val = sci.stats.pearsonr(human_s, machine_s) 
         if (sum_error >= former_sum_error):
             up_time = up_time + 1
-            learning_rate = learning_rate - 0.2
+#            learning_rate = learning_rate - 0.2
         else:
             up_time = 0
-            learning_rate = learning_rate + 0.3
+#            learning_rate = learning_rate + 0.3
         if (p_rel >= 80.0 and up_time == 1 ):
             break
         print "this time error", sum_error

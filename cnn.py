@@ -197,14 +197,16 @@ def cnn_calc(w1,w2):
     else:
 #        print "warning, convolution nodes insufficient","[word]:", w1
         return np.zeros( (1, word_vector_dim), np.float64 ), feature_map
-    #STEP 3: POOLING
+    #STEP 3: POOLING - max pooling
 #    print "pooling"
     final_vector = np.zeros( (1, word_vector_dim), np.float64 )
     conv_nodes_N = np.array(conv_nodes_num, np.float64)
-    for v in convolution_result:
-        final_vector = np.add(final_vector, v)
-    final_vector = np.divide(final_vector, conv_nodes_N)
-    #return v_{x}^*, and feature map for weight updating.
+    i = 0
+    con_mat = np.array(convolution_result, np.float64)
+    while i < len(final_vector):
+        final_vector[i] = np.max( con_mat[:,0] ) #max-pooling
+        i = i + 1
+#   #return v_{x}^*, and feature map for weight updating.
     return final_vector, feature_map
 def cnn_training():
     #initialize weight matrix and bias vector there!
@@ -248,10 +250,10 @@ def cnn_training():
         p_rel, p_val = sci.stats.pearsonr(human_s, machine_s) 
         if (sum_error >= former_sum_error):
             up_time = up_time + 1
-            learning_rate = learning_rate - 0.2
+#            learning_rate = learning_rate - 0.2
         else:
             up_time = 0
-            learning_rate = learning_rate + 0.3
+#            learning_rate = learning_rate + 0.3
         if (p_rel >= 80.0 and up_time == 1 ):
             break
         print "this time error", sum_error
