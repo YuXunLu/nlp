@@ -7,6 +7,7 @@ VECTOR_NAME = "100_3.vec"
 CSV_DIR = "../../csv/"
 CSV_NAME = "R&G-65.csv"
 VECTOR_DIM = 100
+LEARNING_RATE = 0.05
 
 vocab = []
 word_pairs = []
@@ -84,10 +85,10 @@ def get_pooling(word):
     return result
 
 #calculating the sense vector
-def CNN_calc(sense, word, paddle, feature_map, weight_mat):
+def CNN_calc(sense, word, feature_map, weight_mat):
     #the convolutional node # = feature # - 2
     conv_num = len(feature_map) - 2
-    node_feature = np.array( (3, VECTOR_DIM) )
+    node_feature = np.zeros( (3, VECTOR_DIM) )
     conv_result = []
     result = np.zeros(VECTOR_DIM)
     i = 0
@@ -95,7 +96,8 @@ def CNN_calc(sense, word, paddle, feature_map, weight_mat):
     while ( i < conv_num ):
 
         res = np.zeros(VECTOR_DIM)
-
+#        print "nodef",node_feature
+#        print "fmap",feature_map[i]
         node_feature[0] = feature_map[i]
         node_feature[1] = feature_map[i+1]
         node_feature[2] = feature_map[i+2]     
@@ -110,6 +112,16 @@ def CNN_calc(sense, word, paddle, feature_map, weight_mat):
         i = i + 1
     result = result / len(conv_result)
     return result
+
+def margin_function(word, sense_vector):
+    result = -1.0
+    if ( (word_final_vectors.has_key(word)) and (word_hypon_pooling.has_key(word)) ):
+        left = np.linalg.norm( word_final_vectors[word] - word_hypon_pooling[word] )
+        right = np.linalg.norm( word_final_vectors[word] - sense_vector)
+        result = left - right
+        
+    return result
+
 #using cnn train sense vector
 def train_CNN(sense, word):
     sense_vector = np.zeros(VECTOR_DIM)
@@ -131,7 +143,23 @@ def train_CNN(sense, word):
     #step 2: calc cnn
     if ( num_feature_map > 2 ):
         tmp_sense_vector = CNN_calc(sense, word, feature_map, weight_mat)
-        while(tmp_sense_vector
+        #training stage
+        while( margin_function(word, tmp_sense_vector) > 0.0 ):
+            print "word",word,"sense",sense
+            print "margin func",margin_function(word,tmp_sense_vector)
+            print "w_mat"
+            print weight_mat
+            #update each weight
+            factor1 = 0.0
+            i = 0
+            while ( i < VECTOR_DIM ):
+                factor1 = factor1 + word_final_vectors[word][i] - tmp_sense_vector[i]
+                i = i + 1
+
+            conv_num = num_feature_map - 2.0
+            #re-calculate
+            tmp_sense_vector = CNN_calc(sense, word, feature_map, weight_mat)
+        sense_vector = tmp_sense_vector
     return sense_vector
 #build and train sense vectors
 def training_sense_vectors():
@@ -139,7 +167,8 @@ def training_sense_vectors():
         if ( len(word_senses[w]) > 0 ): #polynonmy
             for s in word_senses[w]:
                 if ( len(word_sense_hyponyms[s]) > 0 ): #a sense with many hyponyms
-
+                    print "[train cnn]: word",w, "sense:",s
+                    sense_vector = train_CNN(s, w)
 
 if __name__ == "__main__":
     word_pairs = nlp_lib.read_csv( CSV_DIR + CSV_NAME )
