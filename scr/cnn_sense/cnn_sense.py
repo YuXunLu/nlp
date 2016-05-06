@@ -116,16 +116,17 @@ def CNN_calc(sense, word, feature_map, weight_mat):
 def margin_function(word, sense_vector):
     result = -1.0
     if ( (word_final_vectors.has_key(word)) and (word_hypon_pooling.has_key(word)) ):
-        left = np.linalg.norm( word_final_vectors[word] - word_hypon_pooling[word] )
+        left = np.linalg.norm( word_final_vectors[word] - word_hypon_pooling[word] ) * 0.5
         right = np.linalg.norm( word_final_vectors[word] - sense_vector)
-        result = left - right
-        
+        result = right - left
+        print "left: v* to word_hypon_pooling:",left
+        print "right: v* to sense_vector",right
     return result
 
 #using cnn train sense vector
 def train_CNN(sense, word):
     sense_vector = np.zeros(VECTOR_DIM)
-    paddle = np.zeros(VECTOR_DIM)
+    paddle = np.random.rand(VECTOR_DIM)
     weight_mat = np.identity(3)
     feature_map = []
 
@@ -143,10 +144,14 @@ def train_CNN(sense, word):
     #step 2: calc cnn
     if ( num_feature_map > 2 ):
         tmp_sense_vector = CNN_calc(sense, word, feature_map, weight_mat)
+        print "word",word,"sense",sense
+        m_value = margin_function(word,tmp_sense_vector)
+        print "marigin_func", m_value
+        print "w_mat"
+        print weight_mat
         #training stage
-        while( margin_function(word, tmp_sense_vector) > 0.0 ):
+        while( m_value > 0.0 ):
             print "word",word,"sense",sense
-            print "margin func",margin_function(word,tmp_sense_vector)
             print "w_mat"
             print weight_mat
             #update each weight
@@ -157,8 +162,22 @@ def train_CNN(sense, word):
                 i = i + 1
 
             conv_num = num_feature_map - 2.0
+            #compute dy_dw1
+            dy_dw1 = 0.0
+            i = 0
+            while ( i < VECTOR_DIM):
+                j = 0
+                while ( j < len(feature_map) ):
+                    dy_dw1 = dy_dw1 - feature_map[j][i]
+                    j = j + 3
+                i = i + 1
+            print "feature_map",feature_map
+            dy_dw1 = dy_dw1 / conv_num
+            weight_mat[0][0] = weight_mat[0][0] - factor1 * dy_dw1
             #re-calculate
             tmp_sense_vector = CNN_calc(sense, word, feature_map, weight_mat)
+            m_value = margin_function(word, tmp_sense_vector)
+            print "marigin_function", m_value
         sense_vector = tmp_sense_vector
     return sense_vector
 #build and train sense vectors
@@ -167,7 +186,7 @@ def training_sense_vectors():
         if ( len(word_senses[w]) > 0 ): #polynonmy
             for s in word_senses[w]:
                 if ( len(word_sense_hyponyms[s]) > 0 ): #a sense with many hyponyms
-                    print "[train cnn]: word",w, "sense:",s
+#                    print "[train cnn]: word",w, "sense:",s
                     sense_vector = train_CNN(s, w)
 
 if __name__ == "__main__":
