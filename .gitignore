@@ -6,3 +6,6 @@ wiki_*
 #Files cleaned by bash (step 1)
 *.cln
 test_vector/
+*.log
+*.analyse
+

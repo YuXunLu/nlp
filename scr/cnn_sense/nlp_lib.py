@@ -50,14 +50,21 @@ def read_hyponyms(word, pos = wn.NOUN):
             for l in hypon.lemmas():
                 result.append(l.name())
     return result
-#Testing part, plz do not care about it
+def read_senses(word, pos = wn.NOUN):
+    result = []
+    w_synsets = wn.synsets(word, pos = pos)
+    for s in w_synsets:
+        s_lemmas = s.lemmas()
+        l_name = [str(l.name()) for l in s_lemmas]
+        if DEBUG:
+            print "synset:",s
+            print "lemma name:",l_name
+        if (word in l_name):
+            result.append(s)
+    return result
 test_synonym = {}
 if __name__ == "__main__":
 #This part should never be reached unless u are in debug mode.
-    word_vec = read_csv("./csv/R&G-65.csv")
-    print word_vec
-    for w in word_vec:
-        print "w0",w[0]
-        print "w1",w[1]
-        print "w2",w[2]
-#    word_vec = read_word_vectors("./test_vector/100_3.vec")
+    bank_senses = read_senses("bank")
+    print bank_senses
+    
