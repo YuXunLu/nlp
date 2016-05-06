@@ -29,26 +29,43 @@ def read_word_vectors(filename, split_tag = " "):
     return word_vector
 def read_synonyms(word, pos = wn.NOUN):
     result = []
-    word_synsets = wn.synsets(word, pos)
+    word_synsets = wn.synsets(word, pos = pos)
     for w in word_synsets:
         for lemma in w.lemmas():
             result.append(lemma.name())
     return result
+def read_synonyms_by_sense(sense):
+    result = []
+    for lemma in sense.lemmas():
+        result.append(lemma.name())
+    return result
 def read_hypernyms(word, pos = wn.NOUN):
     result = []
-    word_synsets = wn.synsets(word, pos)
+    word_synsets = wn.synsets(word, pos = pos)
     for w in word_synsets:
         for hyper in w.hypernyms():
             for l in hyper.lemmas():
                 result.append(l.name())
     return result
+def read_hypernyms_by_sense(sense):
+    result = []
+    for hyper in sense.hypernyms():
+        for l in hyper.lemmas():
+            result.append(l.name())
+    return result
 def read_hyponyms(word, pos = wn.NOUN):
     result = []
-    word_synsets = wn.synsets(word, pos)
+    word_synsets = wn.synsets(word, pos = pos)
     for w in word_synsets:
         for hypon in w.hyponyms():
             for l in hypon.lemmas():
                 result.append(l.name())
+    return result
+def read_hyponyms_by_sense(sense):
+    result = []
+    for hypon in sense.hyponyms():
+        for l in hypon.lemmas():
+            result.append(l.name())
     return result
 def read_senses(word, pos = wn.NOUN):
     result = []
