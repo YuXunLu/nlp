@@ -5,7 +5,9 @@ import scipy as sci
 import numpy as np
 DEBUG = 0 #CONTROL DEBUG MODE
 
-
+def calc_pearson(score1, score2):
+    result = []
+    return result
 def read_csv(filename, split_tag = ","):
     word_csv = []
     csv_file = open(filename,"r")
