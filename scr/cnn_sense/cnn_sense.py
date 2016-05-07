@@ -7,7 +7,7 @@ VECTOR_NAME = "100_3.vec"
 CSV_DIR = "../../csv/"
 CSV_NAME = "R&G-65.csv"
 VECTOR_DIM = 100
-LEARNING_RATE = 0.0005
+LEARNING_RATE = 0.005
 
 vocab = []
 word_pairs = []
@@ -23,6 +23,7 @@ word_synonyms = {}
 
 word_final_vectors = {}
 word_hypon_pooling = {}
+word_sense_hypon_pooling = {}
 def cos_sim(v1, v2):
     result = 0.0
     v1_len = np.dot( np.transpose(v1), v1)
@@ -36,6 +37,18 @@ def cos_sim(v1, v2):
 
     result = up/bottom
     return result
+def get_hypon_pooling_sense(s):
+    result = np.zeros(VECTOR_DIM)
+    i = 0.0
+    if (len(word_sense_hyponyms[s]) > 0 ):
+        for hypon in word_sense_hyponyms[s]:
+            if word_vectors.has_key(hypon):
+                result = result + word_vectors[hypon]
+                i = i + 1.0
+    if ( i - 0.0 > 0 ):
+        result = result / i
+    return result
+    
 def get_hypon_pooling(word):
     i = 0.0
     hypon_pool = np.zeros(VECTOR_DIM)
@@ -102,7 +115,9 @@ def CNN_calc(sense, word, feature_map, weight_mat):
         node_feature[1] = feature_map[i+1]
         node_feature[2] = feature_map[i+2]     
 
-        res = res + node_feature[0] * weight_mat[0][0] + node_feature[1] * weight_mat[1][1] + node_feature[2] * weight_mat[2][2]
+        t_res = np.dot(weight_mat, node_feature)
+        res = t_res[0] + t_res[1] + t_res[2]
+
         conv_result.append(res)
         i = i + 1
     #pooling step
@@ -113,12 +128,12 @@ def CNN_calc(sense, word, feature_map, weight_mat):
     result = result / len(conv_result)
     return result
 
-def margin_function(word, sense_vector):
+def margin_function(word, sense, sense_vector):
     result = -1.0
     if ( (word_final_vectors.has_key(word)) and (word_hypon_pooling.has_key(word)) ):
         left = np.linalg.norm( word_final_vectors[word] - word_hypon_pooling[word] )
         left = left * left
-        right = np.linalg.norm( word_final_vectors[word] - sense_vector)
+        right = np.linalg.norm( word_sense_hypon_pooling[sense]  - sense_vector)
         right = right * right
         result = right - left
         print "left: v* to word_hypon_pooling:",left
@@ -129,7 +144,7 @@ def margin_function(word, sense_vector):
 def train_CNN(sense, word):
     sense_vector = np.zeros(VECTOR_DIM)
     paddle = np.random.rand(VECTOR_DIM)
-    weight_mat = np.identity(3)
+    weight_mat = np.random.randn(3,3)
     feature_map = []
 
     feature_map.append(paddle)
@@ -147,12 +162,14 @@ def train_CNN(sense, word):
     if ( num_feature_map > 2 ):
         tmp_sense_vector = CNN_calc(sense, word, feature_map, weight_mat)
         print "word",word,"sense",sense
-        m_value = margin_function(word,tmp_sense_vector)
+        m_value = margin_function(word, sense, tmp_sense_vector)
+        pre_m_value = m_value
         print "marigin_func", m_value
         print "w_mat"
         print weight_mat
+        stop_flag = 0
         #gradient descent
-        while( m_value > 0.0 ):
+        while( ( m_value > 0.0 ) and (stop_flag == 0 ) ):
             print "word",word,"sense",sense
             print "w_mat"
             print weight_mat
@@ -162,62 +179,77 @@ def train_CNN(sense, word):
             while ( i < VECTOR_DIM ):
                 v_factor1.append( word_final_vectors[word][i] - tmp_sense_vector[i] )
                 i = i + 1
-
+            
+            v_factor1 = np.asarray(v_factor1)
             conv_num = num_feature_map - 2.0
             
-            #dy_dw1
             i = 0
-            dy_dw1_v = []
-            while ( i < VECTOR_DIM):
+            #update for dyt_dwj1, aka for 1st column in weight_mat
+            dy_dwj1 = []
+            while ( i < VECTOR_DIM ):
                 j = 0
-                dy_dw1 = 0.0
-                while ( j < num_feature_map):
-                    dy_dw1 = dy_dw1 + feature_map[j][i]
-                    j = j + 2
-                dy_dw1 = -dy_dw1 / conv_num
-                dy_dw1_v.append(dy_dw1)
+                tmp_grad = 0.0
+                while ( j < num_feature_map ):
+                    tmp_grad = tmp_grad + feature_map[j][i]
+                    j = j + 3
+                tmp_grad = -tmp_grad / conv_num
+                dy_dwj1.append(tmp_grad)
+                i = i + 1
+            dy_dwj1 = np.asarray(dy_dwj1)
+            grad_dwj1 = np.dot(dy_dwj1, np.transpose(v_factor1) )
+            
+            i = 0
+            while ( i < 3 ):
+                weight_mat[i][0] = weight_mat[i][0] - LEARNING_RATE * grad_dwj1
                 i = i + 1
 
-            v_f1 = np.asarray(v_factor1)
-            v_w1 = np.asarray(dy_dw1_v)
-
-            weight_mat[0][0] = weight_mat[0][0] - LEARNING_RATE * np.dot(v_f1, np.transpose(v_w1) )
-
+            #update for dyt_dwj2, aka for 2nd column in weight_mat
             i = 0
-            dy_dw2_v = []
-            while ( i < VECTOR_DIM):
+            dy_dwj2 = []
+            while ( i < VECTOR_DIM ):
                 j = 1
-                dy_dw2 = 0.0
-                while ( j < num_feature_map):
-                    dy_dw2 = dy_dw2 + feature_map[j][i]
-                    j = j + 2
-                dy_dw2 = -dy_dw2 / conv_num
-                dy_dw2_v.append(dy_dw2)
+                tmp_grad = 0.0
+                while ( j < num_feature_map ):
+                    tmp_grad = tmp_grad + feature_map[j][i]
+                    j = j + 3
+                tmp_grad = -tmp_grad / conv_num
+                dy_dwj2.append(tmp_grad)
                 i = i + 1
-
-            v_w2 = np.asarray(dy_dw2_v)
-            weight_mat[1][1] = weight_mat[1][1] - LEARNING_RATE * np.dot(v_f1, np.transpose(v_w2) )
-
+            dy_dwj2 = np.asarray(dy_dwj2)
+            grad_dwj2 = np.dot(dy_dwj2, np.transpose(v_factor1) )
             i = 0
-            dy_dw3_v = []
-            while ( i < VECTOR_DIM):
-                j = 2
-                dy_dw3 = 0.0
-                while ( j < num_feature_map):
-                    dy_dw3 = dy_dw3 + feature_map[j][i]
-                    j = j + 2
-                dy_dw3 = -dy_dw3 / conv_num
-                dy_dw3_v.append(dy_dw3)
+            while ( i < 3 ):
+                weight_mat[i][1] = weight_mat[i][1] - LEARNING_RATE * grad_dwj2
                 i = i + 1
 
-            v_w3 = np.asarray(dy_dw3_v)
-            weight_mat[2][2] = weight_mat[2][2] - LEARNING_RATE * np.dot(v_f1, np.transpose(v_w3) )
-
+            #update for dyt_dwj3, aka for 3rd column in weight_mat
+            i = 0
+            dy_dwj3 = []
+            while ( i < VECTOR_DIM ):
+                j = 2
+                tmp_grad = 0.0
+                while ( j < num_feature_map):
+                    tmp_grad = tmp_grad + feature_map[j][i]
+                    j = j + 3
+                tmp_grad = -tmp_grad/ conv_num
+                dy_dwj3.append(tmp_grad)
+                i = i + 1
+            dy_dwj3 = np.asarray(dy_dwj3)
+            grad_dwj3 = np.dot(dy_dwj3, np.transpose(v_factor1) )
+            i = 0
+            while ( i < 3 ):
+                weight_mat[i][2] = weight_mat[i][2] - LEARNING_RATE * grad_dwj3
+                i = i + 1
 
 
             #re-calculate
+            pre_sense_vector = tmp_sense_vector
             tmp_sense_vector = CNN_calc(sense, word, feature_map, weight_mat)
-            m_value = margin_function(word, tmp_sense_vector)
+            m_value = margin_function(word, sense, tmp_sense_vector)
+            if ( m_value > pre_m_value ):
+                stop_flag = 1
+                tmp_sense_vector = pre_sense_vector
+            pre_m_value = m_value
             print "marigin_function", m_value
         sense_vector = tmp_sense_vector
     return sense_vector
@@ -229,7 +261,8 @@ def training_sense_vectors():
                 if ( len(word_sense_hyponyms[s]) > 0 ): #a sense with many hyponyms
 #                    print "[train cnn]: word",w, "sense:",s
                     sense_vector = train_CNN(s, w)
-
+                    word_sense_vectors[w] = sense_vector
+def test_sense_vectors():
 if __name__ == "__main__":
     word_pairs = nlp_lib.read_csv( CSV_DIR + CSV_NAME )
     for w_pair in word_pairs:
@@ -244,6 +277,7 @@ if __name__ == "__main__":
     for w in vocab:
         for s in word_senses[w]:
             word_sense_hyponyms[s] = nlp_lib.read_hyponyms_by_sense(s)
+            word_sense_hypon_pooling[s] = get_hypon_pooling_sense(s)
     #read for retrofitting
     for w in vocab:
         word_hyponyms[w] = nlp_lib.read_hyponyms(w)
@@ -257,3 +291,5 @@ if __name__ == "__main__":
         word_final_vectors[w] = get_pooling(w)
         word_hypon_pooling[w] = get_hypon_pooling(w)
     training_sense_vectors()
+    #calculate pearson similarity
+    test_sense_vectors()
