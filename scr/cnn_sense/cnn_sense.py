@@ -5,7 +5,7 @@ import scipy as sci
 VECTOR_DIR ="../test_vector/"
 VECTOR_NAME = "100_3.vec"
 CSV_DIR = "../../csv/"
-CSV_NAME = "R&G-65.csv"
+CSV_NAME = "WordSim353.csv"
 VECTOR_DIM = 100
 LEARNING_RATE = 0.005
 
@@ -268,8 +268,8 @@ def test_sense_vectors():
 
     #Our old approach
     for w_pair in word_pairs:
-        w1 = w_pair[0]
-        w2 = w_pair[1]
+        w1 = w_pair[0].lower()
+        w2 = w_pair[1].lower()
         h_score = float(w_pair[2])
 
         v1 = word_final_vectors[w1]
@@ -288,8 +288,8 @@ def test_sense_vectors():
 
     #My Approach
     for w_pair in word_pairs:
-        w1 = w_pair[0]
-        w2 = w_pair[1]
+        w1 = w_pair[0].lower()
+        w2 = w_pair[1].lower()
         w1_s_vec = []
         w2_s_vec = []
         num_1 = 0
@@ -338,8 +338,8 @@ def test_sense_vectors():
 if __name__ == "__main__":
     word_pairs = nlp_lib.read_csv( CSV_DIR + CSV_NAME )
     for w_pair in word_pairs:
-        vocab.append( w_pair[0] )
-        vocab.append( w_pair[1] )
+        vocab.append( w_pair[0].lower() )
+        vocab.append( w_pair[1].lower() )
     #remove duplicated words in csv file
     vocab = list(set(vocab))
     #read word senses
