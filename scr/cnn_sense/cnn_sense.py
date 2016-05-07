@@ -161,18 +161,18 @@ def train_CNN(sense, word):
     #step 2: calc cnn
     if ( num_feature_map > 2 ):
         tmp_sense_vector = CNN_calc(sense, word, feature_map, weight_mat)
-        print "word",word,"sense",sense
+#        print "word",word,"sense",sense
         m_value = margin_function(word, sense, tmp_sense_vector)
         pre_m_value = m_value
-        print "marigin_func", m_value
-        print "w_mat"
-        print weight_mat
+#        print "marigin_func", m_value
+#        print "w_mat"
+#        print weight_mat
         stop_flag = 0
         #gradient descent
         while( ( m_value > 0.0 ) and (stop_flag == 0 ) ):
-            print "word",word,"sense",sense
-            print "w_mat"
-            print weight_mat
+#            print "word",word,"sense",sense
+#            print "w_mat"
+#            print weight_mat
             #update each weight
             v_factor1 = []
             i = 0
@@ -250,7 +250,7 @@ def train_CNN(sense, word):
                 stop_flag = 1
                 tmp_sense_vector = pre_sense_vector
             pre_m_value = m_value
-            print "marigin_function", m_value
+#            print "marigin_function", m_value
         sense_vector = tmp_sense_vector
     return sense_vector
 #build and train sense vectors
@@ -263,6 +263,78 @@ def training_sense_vectors():
                     sense_vector = train_CNN(s, w)
                     word_sense_vectors[w] = sense_vector
 def test_sense_vectors():
+    human_score = []
+    machine_score = []
+
+    #Our old approach
+    for w_pair in word_pairs:
+        w1 = w_pair[0]
+        w2 = w_pair[1]
+        h_score = float(w_pair[2])
+
+        v1 = word_final_vectors[w1]
+        v2 = word_final_vectors[w2]
+        m_score = np.dot(v1, np.transpose(v2) ) / ( np.linalg.norm(v1) * np.linalg.norm(v2) )
+        
+        human_score.append(h_score)
+        machine_score.append(m_score)
+
+    sp1_val, sp1_rel = sci.stats.spearmanr(human_score, machine_score)
+
+    print "Our pooling approach Spearman rel", sp1_val
+
+    human_score = []
+    machine_score = []
+
+    #My Approach
+    for w_pair in word_pairs:
+        w1 = w_pair[0]
+        w2 = w_pair[1]
+        w1_s_vec = []
+        w2_s_vec = []
+        num_1 = 0
+        m_score = 0.0
+        for s in word_senses[w1]:
+            if (word_sense_vectors.has_key(s) ):
+                if ( np.norm(word_sense_vectors[s]) > 0 ): #not a zero vector
+                    w1_s_vec.append( word_sense_vectors[s] )
+        for s in word_senses[w2]:
+            if (word_sense_vectors.has_key(s) ):
+                if ( np.norm(word_sense_vectors[s]) > 0 ):#not a zero vec
+                    w2_s_vec.append( word_sense_vectors[s] )
+        if ( (len(w1_s_vec) > 0 ) and ( len(w2_s_vec) > 0 ) ):
+            for v1 in w1_s_vec:
+                for v2 in w2_s_vec:
+                    m_score = m_score + np.dot(v1, np.transpose(v2) ) / ( np.linalg.norm(v1) * np.linalg.norm(v2) )
+
+            m_score = m_score / ( len(w1_s_vec) * len(w2_s_Vec) )
+            machine_score.append(m_score)
+        #w1 multiple meanings while w2 not
+        if ( (len(w1_s_vec) > 0 ) and ( len (w2_s_vec) == 0 ) ):
+            for v1 in w1_s_vec:
+                m_score = m_score + np.dot(v1, np.transpose(word_vectors[w2]) ) / (np.linalg.norm(v1) * np.linalg.norm(word_vectors[w2]))
+
+            m_score = m_score / len(w1_s_vec)
+            machine_score.append(m_score)
+
+        if ( (len(w2_s_vec) > 0 ) and ( len (w1_s_vec) == 0 ) ):
+            for v2 in w2_s_vec:
+                m_score = m_score + np.dot(v2, np.transpose(word_vectors[w1]) ) / (np.linalg.norm(v2) * np.linalg.norm(word_vectors[w1]))
+
+            m_score = m_score / len(w2_s_vec)
+            machine_score.append(m_score)
+
+        if ( (len(w2_s_vec) == 0 ) and ( len (w1_s_vec) == 0 ) ):
+            m_score = np.dot( word_vectors[w1], word_vectors[w2] ) / ( np.linalg.norm(word_vectors[w1]) * np.linalg.norm(word_vectors[w2]))
+            machine_score.append(m_score)
+
+        
+        h_s = float ( w_pair[2] )
+        human_score.append(h_s)
+    #calc pearson
+    p_rel, p_val = sci.stats.spearmanr(human_score, machine_score)
+    print "My Approach Spearman Correlation Factor:",p_rel
+
 if __name__ == "__main__":
     word_pairs = nlp_lib.read_csv( CSV_DIR + CSV_NAME )
     for w_pair in word_pairs:
