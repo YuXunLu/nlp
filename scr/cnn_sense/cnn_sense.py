@@ -5,7 +5,7 @@ import scipy as sci
 VECTOR_DIR ="../test_vector/"
 VECTOR_NAME = "100_3.vec"
 CSV_DIR = "../../csv/"
-CSV_NAME = "WordSim353.csv"
+CSV_NAME = "M&C-30.csv"
 VECTOR_DIM = 100
 LEARNING_RATE = 0.005
 
@@ -36,6 +36,22 @@ def cos_sim(v1, v2):
     bottom = v2_len * v1_len
 
     result = up/bottom
+    return result
+def get_full_pooling_sense(s):
+    result = np.zeros(VECTOR_DIM)
+    i = 0.0
+    if (len(word_sense_hypernyms[s]) > 0):
+        for hyper in word_sense_hypernyms[s]:
+            if word_vectors.has_key(hyper):
+                result = result + word_vectors[hyper]
+    if (len(word_sense_hyponyms[s]) > 0 ):
+        for hypon in word_sense_hyponyms[s]:
+            if word_vectors.has_key(hypon):
+                result = result + word_vectors[hypon]
+    if (len(word_sense_synonyms[s] ) > 0 ):
+        for syn in word_sense_synonyms[s]:
+            if word_vectors.has_key(syn):
+                result = result + word_vectors[syn]
     return result
 def get_hypon_pooling_sense(s):
     result = np.zeros(VECTOR_DIM)
@@ -296,18 +312,18 @@ def test_sense_vectors():
         m_score = 0.0
         for s in word_senses[w1]:
             if (word_sense_vectors.has_key(s) ):
-                if ( np.norm(word_sense_vectors[s]) > 0 ): #not a zero vector
+                if ( np.linalg.norm(word_sense_vectors[s]) > 0 ): #not a zero vector
                     w1_s_vec.append( word_sense_vectors[s] )
         for s in word_senses[w2]:
             if (word_sense_vectors.has_key(s) ):
-                if ( np.norm(word_sense_vectors[s]) > 0 ):#not a zero vec
+                if ( np.linalg.norm(word_sense_vectors[s]) > 0 ):#not a zero vec
                     w2_s_vec.append( word_sense_vectors[s] )
         if ( (len(w1_s_vec) > 0 ) and ( len(w2_s_vec) > 0 ) ):
             for v1 in w1_s_vec:
                 for v2 in w2_s_vec:
                     m_score = m_score + np.dot(v1, np.transpose(v2) ) / ( np.linalg.norm(v1) * np.linalg.norm(v2) )
 
-            m_score = m_score / ( len(w1_s_vec) * len(w2_s_Vec) )
+            m_score = m_score / ( len(w1_s_vec) * len(w2_s_vec) )
             machine_score.append(m_score)
         #w1 multiple meanings while w2 not
         if ( (len(w1_s_vec) > 0 ) and ( len (w2_s_vec) == 0 ) ):
