@@ -261,7 +261,7 @@ def training_sense_vectors():
                 if ( len(word_sense_hyponyms[s]) > 0 ): #a sense with many hyponyms
 #                    print "[train cnn]: word",w, "sense:",s
                     sense_vector = train_CNN(s, w)
-                    word_sense_vectors[w] = sense_vector
+                    word_sense_vectors[s] = sense_vector
 def test_sense_vectors():
     human_score = []
     machine_score = []
