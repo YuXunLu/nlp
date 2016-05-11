@@ -13,8 +13,10 @@ vocab = []
 word_pairs = []
 word_senses = {}
 word_sense_hyponyms = {}
+word_sense_hypernyms = {}
+word_sense_synonyms = {}
 word_sense_vectors = {}
-
+word_sense_full_pooling = {}
 
 word_hyponyms = {}
 word_hypernyms = {}
@@ -44,37 +46,20 @@ def get_full_pooling_sense(s):
         for hyper in word_sense_hypernyms[s]:
             if word_vectors.has_key(hyper):
                 result = result + word_vectors[hyper]
+                i = i + 1.0
     if (len(word_sense_hyponyms[s]) > 0 ):
         for hypon in word_sense_hyponyms[s]:
             if word_vectors.has_key(hypon):
-                result = result + word_vectors[hypon]
+                result = result + word_vectors[hypon] 
+                i = i + 1.0
     if (len(word_sense_synonyms[s] ) > 0 ):
         for syn in word_sense_synonyms[s]:
             if word_vectors.has_key(syn):
                 result = result + word_vectors[syn]
-    return result
-def get_hypon_pooling_sense(s):
-    result = np.zeros(VECTOR_DIM)
-    i = 0.0
-    if (len(word_sense_hyponyms[s]) > 0 ):
-        for hypon in word_sense_hyponyms[s]:
-            if word_vectors.has_key(hypon):
-                result = result + word_vectors[hypon]
                 i = i + 1.0
-    if ( i - 0.0 > 0 ):
+    if ( ( i - 0.0 ) > 0.0 ):
         result = result / i
     return result
-    
-def get_hypon_pooling(word):
-    i = 0.0
-    hypon_pool = np.zeros(VECTOR_DIM)
-    for hypon in word_hyponyms[word]:
-        if (word_vectors.has_key(hypon) ):
-            hypon_pool = hypon_pool + word_vectors[hypon]
-            i = i + 1.0
-    if ( (i-1.0) > 0 ):
-        hypon_pool = hypon_pool / i
-    return hypon_pool
 def get_pooling(word):
     
     if ( word_vectors.has_key(word) ):
@@ -146,14 +131,14 @@ def CNN_calc(sense, word, feature_map, weight_mat):
 
 def margin_function(word, sense, sense_vector):
     result = -1.0
-    if ( (word_final_vectors.has_key(word)) and (word_hypon_pooling.has_key(word)) ):
-        left = np.linalg.norm( word_final_vectors[word] - word_hypon_pooling[word] )
+    if ( (word_final_vectors.has_key(word)) and (word_vectors.has_key(word)) ):
+        left = np.linalg.norm( word_final_vectors[word] - word_vectors[word] )
         left = left * left
-        right = np.linalg.norm( word_sense_hypon_pooling[sense]  - sense_vector)
+        right = np.linalg.norm( word_sense_full_pooling[sense]  - sense_vector)
         right = right * right
         result = right - left
         print "left: v* to word_hypon_pooling:",left
-        print "right: v* to sense_vector",right
+        print "right: v_s* to sense_vector",right
     return result
 
 #using cnn train sense vector
@@ -165,10 +150,28 @@ def train_CNN(sense, word):
 
     feature_map.append(paddle)
 
-    #step1: build feature map
+    #step1: build feature map - to full pooling!
+    vec_hypon = []
+    vec_hyper = []
+    vec_syn = []
+
+    i = 0
+    for hyper in word_sense_hypernyms[sense]:
+        if (word_vectors.has_key(hyper) ):
+            vec_hyper.append( word_vectors[hyper] )
+    for syn in word_sense_synonyms[sense]:
+        if (word_vectors.has_key(syn) ):
+            vec_syn.append( word_vectors[syn] )
     for hypon in word_sense_hyponyms[sense]:
-        if ( word_vectors.has_key(hypon) ):
-            feature_map.append(word_vectors[hypon])
+        if (word_vectors.has_key(hypon) ):
+            vec_hypon.append( word_vectors[hypon] )
+    
+    i = 0
+    while (  ( i < len(vec_hyper) ) and ( i < len(vec_syn) ) and ( i < len(vec_hypon) ) ):
+        feature_map.append(vec_hyper[i] )
+        feature_map.append(vec_syn[i] )
+        feature_map.append(vec_hypon[i] )
+        i = i + 1
 
     feature_map.append(paddle)
 
@@ -274,10 +277,8 @@ def training_sense_vectors():
     for w in vocab:
         if ( len(word_senses[w]) > 0 ): #polynonmy
             for s in word_senses[w]:
-                if ( len(word_sense_hyponyms[s]) > 0 ): #a sense with many hyponyms
-#                    print "[train cnn]: word",w, "sense:",s
-                    sense_vector = train_CNN(s, w)
-                    word_sense_vectors[s] = sense_vector
+                sense_vector = train_CNN(s, w)
+                word_sense_vectors[s] = sense_vector
 def test_sense_vectors():
     human_score = []
     machine_score = []
@@ -365,7 +366,9 @@ if __name__ == "__main__":
     for w in vocab:
         for s in word_senses[w]:
             word_sense_hyponyms[s] = nlp_lib.read_hyponyms_by_sense(s)
-            word_sense_hypon_pooling[s] = get_hypon_pooling_sense(s)
+            word_sense_hypernyms[s] = nlp_lib.read_hypernyms_by_sense(s)
+            word_sense_synonyms[s] = nlp_lib.read_synonyms_by_sense(s)
+            word_sense_full_pooling[s] = get_full_pooling_sense(s)
     #read for retrofitting
     for w in vocab:
         word_hyponyms[w] = nlp_lib.read_hyponyms(w)
@@ -377,7 +380,6 @@ if __name__ == "__main__":
 
     for w in vocab:
         word_final_vectors[w] = get_pooling(w)
-        word_hypon_pooling[w] = get_hypon_pooling(w)
     training_sense_vectors()
     #calculate pearson similarity
     test_sense_vectors()
