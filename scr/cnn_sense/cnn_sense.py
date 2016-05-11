@@ -5,7 +5,7 @@ import scipy as sci
 VECTOR_DIR ="../test_vector/"
 VECTOR_NAME = "100_3.vec"
 CSV_DIR = "../../csv/"
-CSV_NAME = "M&C-30.csv"
+CSV_NAME = "WordSim353.csv"
 VECTOR_DIM = 100
 LEARNING_RATE = 0.005
 
@@ -36,29 +36,44 @@ def cos_sim(v1, v2):
 
     up = np.dot( np.transpose(v1), v2)
     bottom = v2_len * v1_len
-
     result = up/bottom
     return result
-def get_full_pooling_sense(s):
+def get_full_pooling_sense(s, word):
     result = np.zeros(VECTOR_DIM)
-    i = 0.0
+    hyper_pool = np.zeros(VECTOR_DIM)
+    hypon_pool = np.zeros(VECTOR_DIM)
+    syn_pool = np.zeros(VECTOR_DIM)
+
+    i = 1.0
     if (len(word_sense_hypernyms[s]) > 0):
         for hyper in word_sense_hypernyms[s]:
             if word_vectors.has_key(hyper):
-                result = result + word_vectors[hyper]
+                hyper_pool = hyper_pool + word_vectors[hyper]
                 i = i + 1.0
+    if ( ( i - 1.0 ) > 0.0 ):
+        hyper_pool = hyper_pool / i
+
+    i = 1.0
     if (len(word_sense_hyponyms[s]) > 0 ):
         for hypon in word_sense_hyponyms[s]:
             if word_vectors.has_key(hypon):
-                result = result + word_vectors[hypon] 
+                hypon_pool = hypon_pool + word_vectors[hypon] 
                 i = i + 1.0
+    if ( ( i - 1.0 ) > 0.0 ):
+        hypon_pool = hypon_pool / i
+
+    i = 1.0
     if (len(word_sense_synonyms[s] ) > 0 ):
         for syn in word_sense_synonyms[s]:
             if word_vectors.has_key(syn):
-                result = result + word_vectors[syn]
+                syn_pool = syn_pool + word_vectors[syn]
                 i = i + 1.0
-    if ( ( i - 0.0 ) > 0.0 ):
-        result = result / i
+    if ( ( i - 1.0 ) > 0.0 ):
+        syn_pool = syn_pool / i
+
+    result = syn_pool + hypon_pool + hyper_pool
+#    if ( word_vectors.has_key(word) ):
+    result = result + word_vectors[word]
     return result
 def get_pooling(word):
     
@@ -143,8 +158,8 @@ def margin_function(word, sense, sense_vector):
 
 #using cnn train sense vector
 def train_CNN(sense, word):
-    sense_vector = np.zeros(VECTOR_DIM)
-    paddle = np.random.rand(VECTOR_DIM)
+    sense_vector = word_vectors[word]
+    paddle = np.zeros(VECTOR_DIM)
     weight_mat = np.random.randn(3,3)
     feature_map = []
 
@@ -180,16 +195,17 @@ def train_CNN(sense, word):
     #step 2: calc cnn
     if ( num_feature_map > 2 ):
         tmp_sense_vector = CNN_calc(sense, word, feature_map, weight_mat)
-#        print "word",word,"sense",sense
+        print "word",word,"sense",sense
         m_value = margin_function(word, sense, tmp_sense_vector)
         pre_m_value = m_value
-#        print "marigin_func", m_value
+        print "marigin_func", m_value
 #        print "w_mat"
 #        print weight_mat
         stop_flag = 0
         #gradient descent
         while( ( m_value > 0.0 ) and (stop_flag == 0 ) ):
-#            print "word",word,"sense",sense
+            print "word",word,"sense",sense
+            print "margin function", m_value
 #            print "w_mat"
 #            print weight_mat
             #update each weight
@@ -359,6 +375,7 @@ if __name__ == "__main__":
         vocab.append( w_pair[1].lower() )
     #remove duplicated words in csv file
     vocab = list(set(vocab))
+    word_vectors = nlp_lib.read_word_vectors(VECTOR_DIR + VECTOR_NAME)
     #read word senses
     for w in vocab:
         word_senses[w] = nlp_lib.read_senses(w)
@@ -368,15 +385,19 @@ if __name__ == "__main__":
             word_sense_hyponyms[s] = nlp_lib.read_hyponyms_by_sense(s)
             word_sense_hypernyms[s] = nlp_lib.read_hypernyms_by_sense(s)
             word_sense_synonyms[s] = nlp_lib.read_synonyms_by_sense(s)
-            word_sense_full_pooling[s] = get_full_pooling_sense(s)
+            word_sense_full_pooling[s] = get_full_pooling_sense(s, w)
     #read for retrofitting
     for w in vocab:
         word_hyponyms[w] = nlp_lib.read_hyponyms(w)
         word_hypernyms[w] = nlp_lib.read_hypernyms(w)
         word_synonyms[w] = nlp_lib.read_synonyms(w)
-    #read word vectors
 
-    word_vectors = nlp_lib.read_word_vectors(VECTOR_DIR + VECTOR_NAME)
+    for w in vocab:
+        print "word",w
+        if ( word_vectors.has_key(w) ):
+            print "has a vector"
+        else:
+            print "no vector for it"
 
     for w in vocab:
         word_final_vectors[w] = get_pooling(w)
