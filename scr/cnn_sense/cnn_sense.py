@@ -158,7 +158,7 @@ def margin_function(word, sense, sense_vector):
 
 #using cnn train sense vector
 def train_CNN(sense, word):
-    sense_vector = word_vectors[word]
+    sense_vector = np.zeros(VECTOR_DIM)
     paddle = np.zeros(VECTOR_DIM)
     weight_mat = np.random.randn(3,3)
     feature_map = []
