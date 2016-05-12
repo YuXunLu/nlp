@@ -5,7 +5,7 @@ import scipy as sci
 VECTOR_DIR ="../test_vector/"
 VECTOR_NAME = "100_3.vec"
 CSV_DIR = "../../csv/"
-CSV_NAME = "WordSim353.csv"
+CSV_NAME = "M&C-30.csv"
 VECTOR_DIM = 100
 LEARNING_RATE = 0.005
 

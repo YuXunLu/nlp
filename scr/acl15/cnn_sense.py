@@ -13,8 +13,10 @@ vocab = []
 word_pairs = []
 word_senses = {}
 word_sense_hyponyms = {}
+word_sense_hypernyms = {}
+word_sense_synonyms = {}
 word_sense_vectors = {}
-
+word_sense_full_pooling = {}
 
 word_hyponyms = {}
 word_hypernyms = {}
@@ -34,31 +36,45 @@ def cos_sim(v1, v2):
 
     up = np.dot( np.transpose(v1), v2)
     bottom = v2_len * v1_len
-
     result = up/bottom
     return result
-def get_hypon_pooling_sense(s):
+def get_full_pooling_sense(s, word):
     result = np.zeros(VECTOR_DIM)
-    i = 0.0
+    hyper_pool = np.zeros(VECTOR_DIM)
+    hypon_pool = np.zeros(VECTOR_DIM)
+    syn_pool = np.zeros(VECTOR_DIM)
+
+    i = 1.0
+    if (len(word_sense_hypernyms[s]) > 0):
+        for hyper in word_sense_hypernyms[s]:
+            if word_vectors.has_key(hyper):
+                hyper_pool = hyper_pool + word_vectors[hyper]
+                i = i + 1.0
+    if ( ( i - 1.0 ) > 0.0 ):
+        hyper_pool = hyper_pool / i
+
+    i = 1.0
     if (len(word_sense_hyponyms[s]) > 0 ):
         for hypon in word_sense_hyponyms[s]:
             if word_vectors.has_key(hypon):
-                result = result + word_vectors[hypon]
+                hypon_pool = hypon_pool + word_vectors[hypon] 
                 i = i + 1.0
-    if ( i - 0.0 > 0 ):
-        result = result / i
-    return result
-    
-def get_hypon_pooling(word):
-    i = 0.0
-    hypon_pool = np.zeros(VECTOR_DIM)
-    for hypon in word_hyponyms[word]:
-        if (word_vectors.has_key(hypon) ):
-            hypon_pool = hypon_pool + word_vectors[hypon]
-            i = i + 1.0
-    if ( (i-1.0) > 0 ):
+    if ( ( i - 1.0 ) > 0.0 ):
         hypon_pool = hypon_pool / i
-    return hypon_pool
+
+    i = 1.0
+    if (len(word_sense_synonyms[s] ) > 0 ):
+        for syn in word_sense_synonyms[s]:
+            if word_vectors.has_key(syn):
+                syn_pool = syn_pool + word_vectors[syn]
+                i = i + 1.0
+    if ( ( i - 1.0 ) > 0.0 ):
+        syn_pool = syn_pool / i
+
+    result = syn_pool + hypon_pool + hyper_pool
+#    if ( word_vectors.has_key(word) ):
+    result = result + word_vectors[word]
+    return result
 def get_pooling(word):
     
     if ( word_vectors.has_key(word) ):
@@ -130,29 +146,47 @@ def CNN_calc(sense, word, feature_map, weight_mat):
 
 def margin_function(word, sense, sense_vector):
     result = -1.0
-    if ( (word_final_vectors.has_key(word)) and (word_hypon_pooling.has_key(word)) ):
-        left = np.linalg.norm( word_final_vectors[word] - word_hypon_pooling[word] )
+    if ( (word_final_vectors.has_key(word)) and (word_vectors.has_key(word)) ):
+        left = np.linalg.norm( word_final_vectors[word] - word_vectors[word] )
         left = left * left
-        right = np.linalg.norm( word_sense_hypon_pooling[sense]  - sense_vector)
+        right = np.linalg.norm( word_sense_full_pooling[sense]  - sense_vector)
         right = right * right
         result = right - left
         print "left: v* to word_hypon_pooling:",left
-        print "right: v* to sense_vector",right
+        print "right: v_s* to sense_vector",right
     return result
 
 #using cnn train sense vector
 def train_CNN(sense, word):
-    sense_vector = np.zeros(VECTOR_DIM)
-    paddle = np.random.rand(VECTOR_DIM)
+    sense_vector = word_vectors[word]
+    paddle = np.zeros(VECTOR_DIM)
     weight_mat = np.random.randn(3,3)
     feature_map = []
 
     feature_map.append(paddle)
 
-    #step1: build feature map
+    #step1: build feature map - to full pooling!
+    vec_hypon = []
+    vec_hyper = []
+    vec_syn = []
+
+    i = 0
+    for hyper in word_sense_hypernyms[sense]:
+        if (word_vectors.has_key(hyper) ):
+            vec_hyper.append( word_vectors[hyper] )
+    for syn in word_sense_synonyms[sense]:
+        if (word_vectors.has_key(syn) ):
+            vec_syn.append( word_vectors[syn] )
     for hypon in word_sense_hyponyms[sense]:
-        if ( word_vectors.has_key(hypon) ):
-            feature_map.append(word_vectors[hypon])
+        if (word_vectors.has_key(hypon) ):
+            vec_hypon.append( word_vectors[hypon] )
+    
+    i = 0
+    while (  ( i < len(vec_hyper) ) and ( i < len(vec_syn) ) and ( i < len(vec_hypon) ) ):
+        feature_map.append(vec_hyper[i] )
+        feature_map.append(vec_syn[i] )
+        feature_map.append(vec_hypon[i] )
+        i = i + 1
 
     feature_map.append(paddle)
 
@@ -161,16 +195,17 @@ def train_CNN(sense, word):
     #step 2: calc cnn
     if ( num_feature_map > 2 ):
         tmp_sense_vector = CNN_calc(sense, word, feature_map, weight_mat)
-#        print "word",word,"sense",sense
+        print "word",word,"sense",sense
         m_value = margin_function(word, sense, tmp_sense_vector)
         pre_m_value = m_value
-#        print "marigin_func", m_value
+        print "marigin_func", m_value
 #        print "w_mat"
 #        print weight_mat
         stop_flag = 0
         #gradient descent
         while( ( m_value > 0.0 ) and (stop_flag == 0 ) ):
-#            print "word",word,"sense",sense
+            print "word",word,"sense",sense
+            print "margin function", m_value
 #            print "w_mat"
 #            print weight_mat
             #update each weight
@@ -258,10 +293,8 @@ def training_sense_vectors():
     for w in vocab:
         if ( len(word_senses[w]) > 0 ): #polynonmy
             for s in word_senses[w]:
-                if ( len(word_sense_hyponyms[s]) > 0 ): #a sense with many hyponyms
-#                    print "[train cnn]: word",w, "sense:",s
-                    sense_vector = train_CNN(s, w)
-                    word_sense_vectors[s] = sense_vector
+                sense_vector = train_CNN(s, w)
+                word_sense_vectors[s] = sense_vector
 def test_sense_vectors():
     human_score = []
     machine_score = []
@@ -296,18 +329,18 @@ def test_sense_vectors():
         m_score = 0.0
         for s in word_senses[w1]:
             if (word_sense_vectors.has_key(s) ):
-                if ( np.norm(word_sense_vectors[s]) > 0 ): #not a zero vector
+                if ( np.linalg.norm(word_sense_vectors[s]) > 0 ): #not a zero vector
                     w1_s_vec.append( word_sense_vectors[s] )
         for s in word_senses[w2]:
             if (word_sense_vectors.has_key(s) ):
-                if ( np.norm(word_sense_vectors[s]) > 0 ):#not a zero vec
+                if ( np.linalg.norm(word_sense_vectors[s]) > 0 ):#not a zero vec
                     w2_s_vec.append( word_sense_vectors[s] )
         if ( (len(w1_s_vec) > 0 ) and ( len(w2_s_vec) > 0 ) ):
             for v1 in w1_s_vec:
                 for v2 in w2_s_vec:
                     m_score = m_score + np.dot(v1, np.transpose(v2) ) / ( np.linalg.norm(v1) * np.linalg.norm(v2) )
 
-            m_score = m_score / ( len(w1_s_vec) * len(w2_s_Vec) )
+            m_score = m_score / ( len(w1_s_vec) * len(w2_s_vec) )
             machine_score.append(m_score)
         #w1 multiple meanings while w2 not
         if ( (len(w1_s_vec) > 0 ) and ( len (w2_s_vec) == 0 ) ):
@@ -342,6 +375,7 @@ if __name__ == "__main__":
         vocab.append( w_pair[1].lower() )
     #remove duplicated words in csv file
     vocab = list(set(vocab))
+    word_vectors = nlp_lib.read_word_vectors(VECTOR_DIR + VECTOR_NAME)
     #read word senses
     for w in vocab:
         word_senses[w] = nlp_lib.read_senses(w)
@@ -349,19 +383,24 @@ if __name__ == "__main__":
     for w in vocab:
         for s in word_senses[w]:
             word_sense_hyponyms[s] = nlp_lib.read_hyponyms_by_sense(s)
-            word_sense_hypon_pooling[s] = get_hypon_pooling_sense(s)
+            word_sense_hypernyms[s] = nlp_lib.read_hypernyms_by_sense(s)
+            word_sense_synonyms[s] = nlp_lib.read_synonyms_by_sense(s)
+            word_sense_full_pooling[s] = get_full_pooling_sense(s, w)
     #read for retrofitting
     for w in vocab:
         word_hyponyms[w] = nlp_lib.read_hyponyms(w)
         word_hypernyms[w] = nlp_lib.read_hypernyms(w)
         word_synonyms[w] = nlp_lib.read_synonyms(w)
-    #read word vectors
 
-    word_vectors = nlp_lib.read_word_vectors(VECTOR_DIR + VECTOR_NAME)
+    for w in vocab:
+        print "word",w
+        if ( word_vectors.has_key(w) ):
+            print "has a vector"
+        else:
+            print "no vector for it"
 
     for w in vocab:
         word_final_vectors[w] = get_pooling(w)
-        word_hypon_pooling[w] = get_hypon_pooling(w)
     training_sense_vectors()
     #calculate pearson similarity
     test_sense_vectors()
