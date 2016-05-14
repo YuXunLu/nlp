@@ -73,7 +73,7 @@ def get_full_pooling_sense(s, word):
 
     result = syn_pool + hypon_pool + hyper_pool
 #    if ( word_vectors.has_key(word) ):
-    result = result + word_vectors[word]
+#    result = result + word_vectors[word]
     return result
 def get_pooling(word):
     

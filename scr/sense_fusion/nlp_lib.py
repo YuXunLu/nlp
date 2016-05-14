@@ -4,7 +4,27 @@ from nltk.corpus import wordnet as wn
 import scipy as sci
 import numpy as np
 DEBUG = 0 #CONTROL DEBUG MODE
+def get_single_pooling(word, rel_words, word_vectors, word_dim = 100):
+    i = 1.0
+    result = np.zeros(word_dim)
+    for w in rel_words[word]:
+        if ( word_vectors.has_key(w) ):
+            result = result + word_vectors[w]
+            i = i + 1.0
+    if ( i - 1.0 > 0.0):
+        result = result / i
+    return result
+def get_pooling(word, word_hypernyms, word_synonyms, word_hyponyms, word_vectors, word_dim = 100):
+    result = np.zeros(word_dim)
+    if word_vectors.has_key(word):
+        result = result + word_vectors[word]:
 
+    hyper_pool = get_word_single_pooling(word, word_hypernyms, word_vectors, word_dim)
+    syn_pool = get_word_single_pooling(word, word_synonyms, word_vectors, word_dim)
+    hypon_pool = get_word_single_pooling(word, word_hyponyms, word_vectors, word_dim)
+
+    result = result + hyper_pool + syn_pool + hypon_pool
+    return result
 def calc_pearson(score1, score2):
     result = []
     return result
