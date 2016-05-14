@@ -1,0 +1,262 @@
+word woodland sense Synset('forest.n.02')
+Cost: 158.210264522
+word stove sense Synset('stove.n.01')
+Cost: 344.357033761
+word stove sense Synset('stove.n.02')
+Cost: 230.949498882
+word sage sense Synset('sage.n.01')
+Cost: 236.893912107
+word sage sense Synset('sage.n.02')
+Cost: 223.191672086
+word sage sense Synset('sage.n.03')
+Cost: 179.145536499
+word rooster sense Synset('cock.n.04')
+Cost: 269.657535707
+word asylum sense Synset('refuge.n.03')
+Cost: 347.691864342
+word asylum sense Synset('mental_hospital.n.01')
+Cost: 267.45896691
+word grin sense Synset('smile.n.01')
+Cost: 90.4495025366
+word voyage sense Synset('ocean_trip.n.01')
+Cost: 498.028183274
+word voyage sense Synset('voyage.n.02')
+Cost: 492.806744575
+word brother sense Synset('brother.n.01')
+Cost: 296.349348006
+word brother sense Synset('brother.n.02')
+Cost: 361.435991048
+word brother sense Synset('buddy.n.01')
+Cost: 331.577959496
+word brother sense Synset('brother.n.04')
+Cost: 276.21956979
+word automobile sense Synset('car.n.01')
+Cost: 118.397162554
+word noon sense Synset('noon.n.01')
+Cost: 195.52359392
+word wizard sense Synset('ace.n.03')
+Cost: 317.126708165
+word wizard sense Synset('sorcerer.n.01')
+Cost: 118.247735283
+word cemetery sense Synset('cemetery.n.01')
+Cost: 294.676107667
+word food sense Synset('food.n.01')
+Cost: 283.181381156
+word food sense Synset('food.n.02')
+Cost: 326.207219851
+word food sense Synset('food.n.03')
+Cost: 410.280188699
+word forest sense Synset('forest.n.01')
+Cost: 166.476476009
+word forest sense Synset('forest.n.02')
+Cost: 235.357314786
+word tumbler sense Synset('tumbler.n.01')
+Cost: 234.995003825
+word tumbler sense Synset('tumbler.n.02')
+Cost: 214.027441007
+word tumbler sense Synset('tumbler.n.03')
+Cost: 154.631910886
+word tumbler sense Synset('roller.n.07')
+Cost: 255.590544561
+word smile sense Synset('smile.n.01')
+Cost: 118.3046237
+word furnace sense Synset('furnace.n.01')
+Cost: 328.06313386
+word bird sense Synset('bird.n.01')
+Cost: 109.613350997
+word bird sense Synset('bird.n.02')
+Cost: 167.716685136
+word bird sense Synset('dame.n.01')
+Cost: 214.568496494
+word bird sense Synset('boo.n.01')
+Cost: 216.623497439
+word bird sense Synset('shuttlecock.n.01')
+Cost: 239.9302608
+word midday sense Synset('noon.n.01')
+Cost: 190.683041972
+word hill sense Synset('hill.n.01')
+Cost: 215.174079433
+word hill sense Synset('mound.n.04')
+Cost: 243.622748404
+word hill sense Synset('mound.n.01')
+Cost: 402.703760043
+word cord sense Synset('cord.n.01')
+Cost: 192.136841701
+word cord sense Synset('cord.n.02')
+Cost: 340.187079626
+word cord sense Synset('cord.n.03')
+Cost: 342.253537346
+word cord sense Synset('cord.n.04')
+Cost: 245.589549921
+word slave sense Synset('slave.n.01')
+Cost: 185.210321479
+word slave sense Synset('slave.n.02')
+Cost: 348.928446853
+word slave sense Synset('slave.n.03')
+Cost: 229.863763151
+word string sense Synset('string.n.01')
+Cost: 307.024867217
+word string sense Synset('bowed_stringed_instrument.n.01')
+Cost: 244.62555546
+word string sense Synset('string.n.03')
+Cost: 214.956188487
+word string sense Synset('string.n.04')
+Cost: 341.874518395
+word string sense Synset('string.n.05')
+Cost: 251.881190604
+word string sense Synset('drawstring.n.01')
+Cost: 332.454316899
+word string sense Synset('string.n.07')
+Cost: 308.710816556
+word string sense Synset('string.n.08')
+Cost: 360.53307403
+word string sense Synset('string.n.09')
+Cost: 252.970459456
+word string sense Synset('chain.n.10')
+Cost: 347.57016914
+word graveyard sense Synset('cemetery.n.01')
+Cost: 176.993850414
+word lad sense Synset('chap.n.01')
+Cost: 244.92808965
+word lad sense Synset('cub.n.02')
+Cost: 254.209499484
+word tool sense Synset('tool.n.01')
+Cost: 131.347318931
+word tool sense Synset('instrument.n.02')
+Cost: 151.023791501
+word tool sense Synset('creature.n.03')
+Cost: 216.93679916
+word tool sense Synset('cock.n.01')
+Cost: 267.36052049
+word madhouse sense Synset('bedlam.n.02')
+Cost: 75.6128304572
+word coast sense Synset('seashore.n.01')
+Cost: 193.498303183
+word coast sense Synset('coast.n.02')
+Cost: 278.156632684
+word coast sense Synset('coast.n.03')
+Cost: 331.442444555
+word coast sense Synset('slide.n.05')
+Cost: 449.6047168
+word glass sense Synset('glass.n.01')
+Cost: 231.974350379
+word glass sense Synset('glass.n.02')
+Cost: 160.700074942
+word glass sense Synset('glass.n.03')
+Cost: 332.4205126
+word glass sense Synset('field_glass.n.01')
+Cost: 316.562386847
+word glass sense Synset('methamphetamine.n.01')
+Cost: 281.267878777
+word glass sense Synset('looking_glass.n.01')
+Cost: 219.752806122
+word glass sense Synset('glass.n.07')
+Cost: 200.815321997
+word journey sense Synset('journey.n.01')
+Cost: 213.29750336
+word cushion sense Synset('shock_absorber.n.01')
+Cost: 258.266145222
+word cushion sense Synset('cushion.n.02')
+Cost: 230.561624096
+word cushion sense Synset('cushion.n.03')
+Cost: 162.043607316
+word autograph sense Synset('autograph.n.01')
+Cost: 303.29014361
+word autograph sense Synset('autograph.n.02')
+Cost: 444.940621049
+word crane sense Synset('crane.n.04')
+Cost: 250.11967123
+word crane sense Synset('crane.n.05')
+Cost: 199.256774216
+word magician sense Synset('magician.n.01')
+Cost: 284.953191071
+word magician sense Synset('sorcerer.n.01')
+Cost: 194.67876879
+word mound sense Synset('mound.n.01')
+Cost: 252.706182594
+word mound sense Synset('knoll.n.01')
+Cost: 181.625905272
+word mound sense Synset('pile.n.01')
+Cost: 238.176437288
+word mound sense Synset('mound.n.04')
+Cost: 122.727556824
+word mound sense Synset('pitcher.n.05')
+Cost: 280.953913454
+word gem sense Synset('gem.n.01')
+Cost: 254.993898309
+word gem sense Synset('gem.n.02')
+Cost: 186.136072819
+word gem sense Synset('jewel.n.02')
+Cost: 204.178355392
+word gem sense Synset('muffin.n.01')
+Cost: 310.271644052
+word gem sense Synset('jewel.n.01')
+Cost: 105.48379814
+word boy sense Synset('male_child.n.01')
+Cost: 305.583898308
+word boy sense Synset('boy.n.02')
+Cost: 333.632329273
+word boy sense Synset('son.n.01')
+Cost: 483.304813337
+word boy sense Synset('boy.n.04')
+Cost: 476.591215139
+word car sense Synset('car.n.01')
+Cost: 466.48253432
+word car sense Synset('car.n.02')
+Cost: 532.413995696
+word car sense Synset('car.n.03')
+Cost: 473.16827173
+word car sense Synset('car.n.04')
+Cost: 472.738697666
+word car sense Synset('cable_car.n.01')
+Cost: 472.738697666
+word jewel sense Synset('jewel.n.01')
+Cost: 144.851374731
+word jewel sense Synset('jewel.n.02')
+Cost: 260.263119231
+word monk sense Synset('monk.n.01')
+Cost: 205.381045262
+word serf sense Synset('serf.n.01')
+Cost: 107.002696394
+word shore sense Synset('shore.n.01')
+Cost: 216.179038004
+word shore sense Synset('shore.n.02')
+Cost: 360.973882892
+word fruit sense Synset('fruit.n.01')
+Cost: 231.599252085
+word fruit sense Synset('yield.n.03')
+Cost: 250.716952709
+word fruit sense Synset('fruit.n.03')
+Cost: 313.507852201
+word signature sense Synset('signature.n.01')
+Cost: 207.818980634
+word signature sense Synset('touch.n.04')
+Cost: 195.409192163
+word signature sense Synset('signature.n.03')
+Cost: 196.308514201
+word signature sense Synset('key_signature.n.01')
+Cost: 271.709361284
+word signature sense Synset('signature.n.05')
+Cost: 218.49576151
+word oracle sense Synset('prophet.n.01')
+Cost: 183.326754357
+word oracle sense Synset('oracle.n.02')
+Cost: 211.258473694
+word oracle sense Synset('oracle.n.03')
+Cost: 300.914454701
+word implement sense Synset('implement.n.01')
+Cost: 256.887195234
+word cock sense Synset('cock.n.01')
+Cost: 233.509843133
+word cock sense Synset('stopcock.n.01')
+Cost: 234.246263959
+word cock sense Synset('hammer.n.01')
+Cost: 220.901188
+word cock sense Synset('cock.n.04')
+Cost: 121.94929895
+word cock sense Synset('cock.n.05')
+Cost: 161.825530044
+word pillow sense Synset('pillow.n.01')
+Cost: 233.232124456
+Our pooling approach Spearman rel 0.815175821845
+New Approach Spearman 0.77325873803
