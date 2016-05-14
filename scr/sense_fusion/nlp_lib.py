@@ -17,11 +17,11 @@ def get_single_pooling(word, rel_words, word_vectors, word_dim = 100):
 def get_pooling(word, word_hypernyms, word_synonyms, word_hyponyms, word_vectors, word_dim = 100):
     result = np.zeros(word_dim)
     if word_vectors.has_key(word):
-        result = result + word_vectors[word]:
+        result = result + word_vectors[word]
 
-    hyper_pool = get_word_single_pooling(word, word_hypernyms, word_vectors, word_dim)
-    syn_pool = get_word_single_pooling(word, word_synonyms, word_vectors, word_dim)
-    hypon_pool = get_word_single_pooling(word, word_hyponyms, word_vectors, word_dim)
+    hyper_pool = get_single_pooling(word, word_hypernyms, word_vectors, word_dim)
+    syn_pool = get_single_pooling(word, word_synonyms, word_vectors, word_dim)
+    hypon_pool = get_single_pooling(word, word_hyponyms, word_vectors, word_dim)
 
     result = result + hyper_pool + syn_pool + hypon_pool
     return result
