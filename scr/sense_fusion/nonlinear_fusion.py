@@ -8,7 +8,7 @@ CSV_NAME = "R&G-65.csv"
 VECTOR_DIR = "../test_vector/"
 VECTOR_NAME = "100_3.vec"
 VECTOR_DIM = 100
-L_RATE = 0.05
+L_RATE = 0.5
 word_hypernyms = {}
 word_hyponyms = {}
 word_synonyms = {}
@@ -109,7 +109,7 @@ def train_NN():
         pre_s_star = s_star
         print "cost",cost
         ascent_t = 0
-        while (  cost > (first_cost * 0.5)   ):
+        while (  cost > 0   ):
             grad_u = {}
             grad_b = {}
             s_vecs = []
@@ -153,7 +153,7 @@ def train_NN():
             s_vecs, s_star = calc_NN(w, p_w = para_w, p_u = para_u, p_v = para_v, p_b = para_b)
             cost = cost_function(word_pool[w], s_star)
             print "pre_cost",pre_cost, "cost", cost
-            if ( (pre_cost - cost) < 0.00000001 ):
+            if ( (pre_cost - cost) <= 0.0 ):
                 s_vecs = pre_vecs
                 break
             pre_vecs = s_vecs
