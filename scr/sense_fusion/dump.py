@@ -4,12 +4,11 @@ import numpy as np
 import scipy as sci
 
 CSV_DIR = "../../csv/"
-CSV_NAME = "R&G-65.csv"
+CSV_NAME = "M&C-30.csv"
 VECTOR_DIR = "../test_vector/"
-VECTOR_NAME = "100_8.vec"
-VECTOR_DIM = 100
+VECTOR_NAME = "80_10.vec"
+VECTOR_DIM = 80
 L_RATE = 0.5
-epsilon = 1e-11
 word_hypernyms = {}
 word_hyponyms = {}
 word_synonyms = {}
@@ -165,9 +164,8 @@ def train_NN():
             pre_cost = cost
             s_vecs, s_star = calc_NN(w, p_w = para_w, p_u = para_u, p_v = para_v, p_b = para_b)
             cost = cost_function(word_pool[w], s_star)
-#            print "pre_cost",pre_cost, "cost", cost
-            if ( (pre_cost - cost) <= epsilon ):
-                print "final pre/ cost",pre_cost,cost
+            print "pre_cost",pre_cost, "cost", cost
+            if ( (pre_cost - cost) <= 1e-8 ):
                 s_vecs = pre_vecs
                 break
             pre_vecs = s_vecs

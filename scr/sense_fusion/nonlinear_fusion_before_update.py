@@ -6,10 +6,9 @@ import scipy as sci
 CSV_DIR = "../../csv/"
 CSV_NAME = "R&G-65.csv"
 VECTOR_DIR = "../test_vector/"
-VECTOR_NAME = "100_8.vec"
-VECTOR_DIM = 100
+VECTOR_NAME = "80_10.vec"
+VECTOR_DIM = 80
 L_RATE = 0.5
-epsilon = 1e-11
 word_hypernyms = {}
 word_hyponyms = {}
 word_synonyms = {}
@@ -44,19 +43,15 @@ def test_sense_vectors():
     p_val, p_rel = sci.stats.spearmanr(human_score, machine_score)
     print "Our old approach:", p_val
     machine_score = []
-    human_score = []
     for p in word_pairs:
         w1 = p[0]
         w2 = p[1]
         m_score = 0.0
         for s1 in senses[w1]:
             for s2 in senses[w2]:
-                if (sense_vectors.has_key(s1) and sense_vectors.has_key(s2)):
-                    m_score = m_score + cos_function(sense_vectors[s1] , sense_vectors[s2])
+                m_score = m_score + cos_function(sense_vectors[s1] , sense_vectors[s2])
         m_score = m_score / ( float( len(senses[w1] ) ) * float ( len(senses[w2])) )
-        if ( m_score > 0.0 ):
-            machine_score.append(m_score)
-            human_score.append(float(p[2]))
+        machine_score.append(m_score)
 
     p_val, p_rel = sci.stats.spearmanr(human_score, machine_score)
     print "My Approach", p_val
@@ -88,7 +83,6 @@ def train_NN():
         para_b = {}
         para_u = {}
         para_w = np.ones( len(senses[w]) )
-        jump_this_word = 0
         #initialize parameters
         for s in senses[w]:
             para_b[s] = np.zeros(VECTOR_DIM)
@@ -104,17 +98,10 @@ def train_NN():
                 if ( word_vectors.has_key(t) ):
                     para_v[s].append( word_vectors[t] )
             feature_num = len(para_v[s])
-            if ( feature_num < 1):
-                print "Warning, sense",s,"word",w,"no features!"
-                if (word_vectors.has_key(w) ):
-                    para_v[s].append(word_vectors[w])
-                else:
-                    print "and its word also no vectors"
-                    jump_this_word = 1
-                    break
+#            para_v[s] = np.asarray(para_v[s])
             para_u[s] = np.random.randn(feature_num)
-        if (jump_this_word == 1):
-            continue
+#            para_v[s] = np.asarray(para_v[s])
+        #update parameters
         pre_vecs, s_star = calc_NN(w, p_w = para_w, p_u = para_u, p_v = para_v, p_b = para_b)
         cost = cost_function(word_pool[w], s_star)
         pre_cost = 10000
@@ -151,6 +138,9 @@ def train_NN():
                 j = 0
                 while ( j < VECTOR_DIM ):
                     tan_part = np.tanh( np.dot ( para_u[s], tmp_v[:,j]) + para_b[s][j] )
+#                    print "para_u", para_u[s]
+#                    print "tmp_v", tmp_v
+#                    print "para_b", para_b[s]
                     tan_part = np.power(tan_part, 2)
                     grad_b[j,j] = 1.0 - tan_part
                     j = j + 1
@@ -165,9 +155,8 @@ def train_NN():
             pre_cost = cost
             s_vecs, s_star = calc_NN(w, p_w = para_w, p_u = para_u, p_v = para_v, p_b = para_b)
             cost = cost_function(word_pool[w], s_star)
-#            print "pre_cost",pre_cost, "cost", cost
-            if ( (pre_cost - cost) <= epsilon ):
-                print "final pre/ cost",pre_cost,cost
+            print "pre_cost",pre_cost, "cost", cost
+            if ( (pre_cost - cost) <= 1e-8 ):
                 s_vecs = pre_vecs
                 break
             pre_vecs = s_vecs
