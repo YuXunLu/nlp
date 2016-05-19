@@ -1,12 +1,12 @@
-#Non-Linear Version of Sense Fusion
+#Simple-Linear Version of Sense Fusion
 import nlp_lib as nlp
 import numpy as np
 import scipy as sci
 
 CSV_DIR = "../../csv/"
-CSV_NAME = "R&G-65.csv"
+CSV_NAME = "WordSim353.csv"
 VECTOR_DIR = "../test_vector/"
-VECTOR_NAME = "100_8.vec"
+VECTOR_NAME = "100_6.vec"
 VECTOR_DIM = 100
 L_RATE = 0.5
 epsilon = 1e-11
@@ -30,7 +30,8 @@ def cos_function(x,y):
     norm_y = np.linalg.norm(y)
     top = np.dot(x, np.transpose(y) )
     result = norm_x * norm_y
-    result = top / result
+    if ( result > 0.0):
+        result = top / result
     return result
 def test_sense_vectors():
     human_score = []
@@ -38,9 +39,10 @@ def test_sense_vectors():
     for p in word_pairs:
         w1 = p[0]
         w2 = p[1]
-        human_score.append( float(p[2]) )
-        m_score = cos_function( word_vectors[w1], word_vectors[w2] )
-        machine_score.append(m_score)
+        if (word_vectors.has_key(w1) and (word_vectors.has_key(w2) ) ):
+            human_score.append( float(p[2]) )
+            m_score = cos_function( word_vectors[w1], word_vectors[w2] )
+            machine_score.append(m_score)
     p_val, p_rel = sci.stats.spearmanr(human_score, machine_score)
     print "Sense-Agnostic approach:", p_val
     human_score = []
@@ -48,9 +50,11 @@ def test_sense_vectors():
     for p in word_pairs:
         w1 = p[0]
         w2 = p[1]
-        human_score.append( float(p[2]))
-        m_score = cos_function(word_pool[w1], word_pool[w2])
-        machine_score.append(m_score)
+        if( word_pool.has_key(w1) and word_pool.has_key(w2) ):
+            m_score = cos_function(word_pool[w1], word_pool[w2])
+            if (m_score > 0.0):
+                human_score.append(float(p[2]))
+                machine_score.append(m_score)
     p_val, p_rel = sci.stats.spearmanr(human_score, machine_score)
     print "Sense-Agnostic Pooling Approach:", p_val
     machine_score = []
@@ -63,7 +67,10 @@ def test_sense_vectors():
             for s2 in senses[w2]:
                 if (sense_vectors.has_key(s1) and sense_vectors.has_key(s2)):
                     m_score = m_score + cos_function(sense_vectors[s1] , sense_vectors[s2])
-        m_score = m_score / ( float( len(senses[w1] ) ) * float ( len(senses[w2])) )
+        if ( len(senses[w1]) > 0.0 and len(senses[w2]) > 0.0):
+            m_score = m_score / ( float( len(senses[w1] ) ) * float ( len(senses[w2])) )
+        else:
+            continue
         if ( m_score > 0.0 ):
             machine_score.append(m_score)
             human_score.append(float(p[2]))

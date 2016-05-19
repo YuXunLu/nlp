@@ -46,12 +46,13 @@ def test_sense_vectors():
         w1 = p[0].lower()
         w2 = p[1].lower()
         m_score = 0.0
-        for v1 in sense_vectors[w1]:
-            for v2 in sense_vectors[w2]:
-                    m_score = m_score + cos_function(v1 , v2)
-                    m_score = m_score / ( float( len(sense_vectors[w1] ) ) * float ( len(sense_vectors[w2])) )
-        machine_score.append(m_score)
-        human_score.append(float(p[2]))
+        if( sense_vectors.has_key(w1) and sense_vectors.has_key(w2) ):
+            for v1 in sense_vectors[w1]:
+                for v2 in sense_vectors[w2]:
+                        m_score = m_score + cos_function(v1 , v2)
+                        m_score = m_score / ( float( len(sense_vectors[w1] ) ) * float ( len(sense_vectors[w2])) )
+            machine_score.append(m_score)
+            human_score.append(float(p[2]))
     p_val, p_rel = sci.stats.spearmanr(human_score, machine_score)
     print "ACL15 Approach", p_val
 if __name__ == "__main__":
