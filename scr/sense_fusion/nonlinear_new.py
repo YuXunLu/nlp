@@ -4,9 +4,9 @@ import numpy as np
 import scipy as sci
 
 CSV_DIR = "../../csv/"
-CSV_NAME = "M&C-30.csv"
+CSV_NAME = "R&G-65.csv"
 VECTOR_DIR = "../test_vector/"
-VECTOR_NAME = "100_6.vec"
+VECTOR_NAME = "100_3.vec"
 VECTOR_DIM = 100
 L_RATE = 0.5
 epsilon = 1e-8
@@ -120,7 +120,7 @@ def train_NN():
             factor0 = np.zeros(VECTOR_DIM)
             factor1 = np.zeros(VECTOR_DIM)
             for s in senses[w]:
-                factor0 = factor0 + (word_pool[w] - sense_vectors[s])
+                factor0 = factor0 + (sense_vectors[s] - word_pool[w])
                 factor1 = factor1 + (sense_vectors[s] - sense_pool[s])
             for s in senses[w]:
                 #compute gradu
@@ -135,7 +135,7 @@ def train_NN():
                         grad_u[k][j] = (1.0 - tan_part) * tmp_v[j,k]
                         j = j + 1
                     k = k + 1
-                grad_u = np.dot(factor1 - factor0, grad_u)
+                grad_u = np.dot(factor1 + factor0, grad_u)
 
                 #compute gradb
                 grad_b = np.zeros( (VECTOR_DIM, VECTOR_DIM) )
@@ -145,7 +145,7 @@ def train_NN():
                     tan_part = np.power(tan_part, 2)
                     grad_b[j,j] = 1.0 - tan_part
                     j = j + 1
-                grad_b = np.dot(factor1 - factor0, grad_b)
+                grad_b = np.dot(factor1 + factor0, grad_b)
                 #update para_u, para_b and para_w
                 para_b[s] = para_b[s] - L_RATE * grad_b
                 para_u[s] = para_u[s] - L_RATE * grad_u
@@ -159,12 +159,15 @@ def train_NN():
             if ( (pre_cost - cost) <= epsilon ):
                 for s in senses[w]:
                     sense_vectors[s] = pre_vecs[s]
+                print "Word",w, "Cost",cost
                 break
             pre_vecs = s_vecs
     test_sense_vectors()
 if __name__ == "__main__":
     word_vectors = nlp.read_word_vectors(VECTOR_DIR + VECTOR_NAME)
     print "LEARNING_RATE", L_RATE
+    print "VECTOR", VECTOR_NAME
+    print "Dataset", CSV_NAME
     word_pairs = nlp.read_csv(CSV_DIR + CSV_NAME)
     vocab = []
     for p in word_pairs:

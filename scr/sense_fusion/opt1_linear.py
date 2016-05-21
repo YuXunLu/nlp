@@ -6,7 +6,7 @@ import scipy as sci
 CSV_DIR = "../../csv/"
 CSV_NAME = "R&G-65.csv"
 VECTOR_DIR = "../test_vector/"
-VECTOR_NAME = "100_6.vec"
+VECTOR_NAME = "100_5.vec"
 VECTOR_DIM = 100
 MAX_ITER = 20
 L_RATE = 0.005
@@ -106,32 +106,32 @@ if __name__ == "__main__":
                 sense_pool[s] = sense_pool[s] + word_vectors[w]
             sense_vectors[s] = word_vectors[w]
         word_pool[w] = nlp.get_pooling(w, word_hypernyms, word_synonyms, word_hyponyms, word_vectors, VECTOR_DIM)
-
-    for w in vocab:
-        pre_cost = 9999999.0
-        cost = cost_func(w, sense_vectors)
-        iter_num = 0
-        new_sense_vec = {}
-        old_sense_vec = {}
-        l_rate = L_RATE
-        while ( cost < pre_cost):
-            print "Word",w,"Iter",iter_num,"Cost",cost
-            for s in senses[w]:
-                old_sense_vec[s] = sense_vectors[s]
-            for s in senses[w]:
-                term1 = np.zeros(VECTOR_DIM)
-                term2 = np.zeros(VECTOR_DIM)
-                for s1 in senses[w]:
-                    term1 = term1 - alpha * ( word_pool[w] - sense_vectors[s1])
-                    term2 = term2 + beta * (sense_vectors[s1] - sense_pool[s1])
-                sense_vectors[s] = sense_vectors[s] - l_rate * (term1 + term2)
-            pre_cost = cost
+    iter_num = 0
+    while (iter_num < MAX_ITER):
+        for w in vocab:
+            pre_cost = 9999999.0
             cost = cost_func(w, sense_vectors)
-            if ( cost > pre_cost):
-                for s1 in senses[w]:
-                    sense_vectors[s1] = old_sense_vec[s1]
-                break;
-            else:
-                l_rate = l_rate / (1.0+5e-6)
-            iter_num = iter_num + 1
+            new_sense_vec = {}
+            old_sense_vec = {}
+            l_rate = L_RATE
+            while ( cost < pre_cost):
+                print "Word",w,"Iter",iter_num,"Cost",cost
+                for s in senses[w]:
+                    old_sense_vec[s] = sense_vectors[s]
+                for s in senses[w]:
+                    term1 = np.zeros(VECTOR_DIM)
+                    term2 = np.zeros(VECTOR_DIM)
+                    for s1 in senses[w]:
+                        term1 = term1 - alpha * ( word_pool[w] - sense_vectors[s1])
+                        term2 = term2 + beta * (sense_vectors[s1] - sense_pool[s1])
+                    sense_vectors[s] = sense_vectors[s] - l_rate * (term1 + term2)
+                pre_cost = cost
+                cost = cost_func(w, sense_vectors)
+                if ( cost > pre_cost):
+                    for s1 in senses[w]:
+                        sense_vectors[s1] = old_sense_vec[s1]
+                    break;
+                else:
+                    l_rate = l_rate / (1.0+5e-6)
+        iter_num = iter_num + 1
     test_sense_vectors()

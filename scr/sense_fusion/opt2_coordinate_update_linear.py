@@ -1,4 +1,4 @@
-#Optimization2: C = 1/2 [ (w* - 1/n \sum_{j=1]^ns_j)^2 + \sum_{k=1}^n (s_j - s_j^*)^2
+#Simple-Linear Version of Sense Fusion
 import nlp_lib as nlp
 import numpy as np
 import scipy as sci
@@ -6,12 +6,10 @@ import scipy as sci
 CSV_DIR = "../../csv/"
 CSV_NAME = "R&G-65.csv"
 VECTOR_DIR = "../test_vector/"
-VECTOR_NAME = "100_4.vec"
+VECTOR_NAME = "100_3.vec"
 VECTOR_DIM = 100
-MAX_ITER = 20
-L_RATE = 0.005
-alpha = 1.0
-beta = 1.0
+L_RATE = 0.5
+epsilon = 1e-11
 word_hypernyms = {}
 word_hyponyms = {}
 word_synonyms = {}
@@ -72,23 +70,8 @@ def test_sense_vectors():
             human_score.append(float(p[2]))
     p_val, p_rel = sci.stats.spearmanr(human_score, machine_score)
     print "Opt2 Approach", p_val
-def cost_func(word, sense_vecs):
-    result = 0.0
-    term1 = np.zeros(VECTOR_DIM)
-    term2 = 0.0
-    for s in senses[word]:
-        term1 = term1 + sense_vecs[s]
-        dis = np.linalg.norm(sense_vecs[s] - sense_pool[s])
-        dis = np.power(dis,2)
-        term2 = term2 + dis
-    term1 = term1 /(1.0 * len(senses[word]) )
-    result = np.linalg.norm(word_pool[word] - term1)
-    result = np.power(result,2)
-    result = result + term2
-    result = 0.5 * result
-    return result
 if __name__ == "__main__":
-    print "VECTOR:", VECTOR_NAME
+    print VECTOR_NAME
     word_vectors = nlp.read_word_vectors(VECTOR_DIR + VECTOR_NAME)
     word_pairs = nlp.read_csv(CSV_DIR + CSV_NAME)
     vocab = []
@@ -96,6 +79,7 @@ if __name__ == "__main__":
         vocab.append(p[0])
         vocab.append(p[1])
     vocab = list(set(vocab))
+    new_sense_vecs = {}
     for w in vocab:
         word_hypernyms[w] = nlp.read_hypernyms(w)
         word_hyponyms[w] = nlp.read_hyponyms(w)
@@ -106,40 +90,35 @@ if __name__ == "__main__":
             sense_hypernyms[s] = nlp.read_hypernyms_by_sense(s)
             sense_hyponyms[s] = nlp.read_hyponyms_by_sense(s)
             sense_synonyms[s] = nlp.read_synonyms_by_sense(s)
-            sense_pool[s] = nlp.get_pooling(s, sense_hypernyms,sense_synonyms,sense_hyponyms, word_vectors, VECTOR_DIM)
+            sense_vectors[s] = nlp.get_pooling(s, sense_hypernyms,sense_synonyms,sense_hyponyms, word_vectors, VECTOR_DIM)
+            sense_pool[s] = nlp.get_pooling(s, sense_hypernyms, sense_synonyms, sense_hyponyms, word_vectors, VECTOR_DIM)
             if ( word_vectors.has_key(w)):
+                sense_vectors[s] = sense_vectors[s] + word_vectors[w]
                 sense_pool[s] = sense_pool[s] + word_vectors[w]
-            sense_vectors[s] = word_vectors[w]
         word_pool[w] = nlp.get_pooling(w, word_hypernyms, word_synonyms, word_hyponyms, word_vectors, VECTOR_DIM)
-    iter_num = 0
-    while (iter_num < MAX_ITER):
-        for w in vocab:
-            pre_cost = 9999999.0
-            cost = cost_func(w, sense_vectors)
-            new_sense_vec = {}
-            old_sense_vec = {}
-            l_rate = L_RATE
-            while ( cost < pre_cost):
+        if ( len(senses[w]) == 1 ):
+            for s in senses[w]:
+                new_sense_vecs[s] = 0.5 * (sense_pool[s] + word_pool[w])
+        else:
+            for s in senses[w]:
+                s_vec = np.zeros(VECTOR_DIM)
                 s_div = len(senses[w])
-                print "Word",w,"Iter",iter_num,"Cost",cost
-                for s in senses[w]:
-                    old_sense_vec[s] = sense_vectors[s]
-                for s in senses[w]:
-                    term1 = np.zeros(VECTOR_DIM)
-                    term2 = np.zeros(VECTOR_DIM)
-                    for s1 in senses[w]:
-                        term1 = term1 + alpha * sense_vectors[s1]
-                        term2 = term2 + beta * (sense_vectors[s1] - sense_pool[s1])
-                    term1 = term1 / (1.0 * s_div)
-                    term1 = -1.0 / (1.0 * s_div) * ( word_pool[w] - term1)
-                    sense_vectors[s] = sense_vectors[s] - l_rate * (term1 + term2)
-                pre_cost = cost
-                cost = cost_func(w, sense_vectors)
-                if ( cost > pre_cost):
-                    for s1 in senses[w]:
-                        sense_vectors[s1] = old_sense_vec[s1]
-                    break;
-                else:
-                    l_rate = l_rate / (1.0+5e-6)
-        iter_num = iter_num + 1
+                term1 = sense_pool[s] + (1.0/s_div) * word_pool[w]
+                term2 = np.zeros(VECTOR_DIM)
+                for s1 in senses[w]:
+                    if (s == s1):
+                        continue
+                    term2 = term2 + sense_vectors[s1]
+                s_vec = term1 -  (1.0/np.power(s_div,2)) * term2
+                s_vec = s_vec / ( 1 + 1/np.power(s_div,2))
+                new_sense_vecs[s] = s_vec
+    for w in vocab:
+        for s in senses[w]:
+            if (new_sense_vecs.has_key(s)):
+                sense_vectors[s] = new_sense_vecs[s]
+            else:
+                print "syn",s,"not in new_sense"
+                if ( sense_vectors.has_key(s) ):
+                    print "but sense vectors do have key"
+                print "len",len(senses[w])
     test_sense_vectors()
