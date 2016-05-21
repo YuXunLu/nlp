@@ -37,8 +37,8 @@ def test_sense_vectors():
     human_score = []
     machine_score = []
     for p in word_pairs:
-        w1 = p[0]
-        w2 = p[1]
+        w1 = p[0].lower()
+        w2 = p[1].lower()
         if (word_vectors.has_key(w1) and (word_vectors.has_key(w2) ) ):
             human_score.append( float(p[2]) )
             m_score = cos_function( word_vectors[w1], word_vectors[w2] )
@@ -48,8 +48,8 @@ def test_sense_vectors():
     human_score = []
     machine_score = []
     for p in word_pairs:
-        w1 = p[0]
-        w2 = p[1]
+        w1 = p[0].lower()
+        w2 = p[1].lower()
         if( word_pool.has_key(w1) and word_pool.has_key(w2) ):
             m_score = cos_function(word_pool[w1], word_pool[w2])
             if (m_score > 0.0):
@@ -60,8 +60,8 @@ def test_sense_vectors():
     machine_score = []
     human_score = []
     for p in word_pairs:
-        w1 = p[0]
-        w2 = p[1]
+        w1 = p[0].lower()
+        w2 = p[1].lower()
         m_score = 0.0
         for s1 in senses[w1]:
             for s2 in senses[w2]:
@@ -81,8 +81,8 @@ if __name__ == "__main__":
     word_pairs = nlp.read_csv(CSV_DIR + CSV_NAME)
     vocab = []
     for p in word_pairs:
-        vocab.append(p[0])
-        vocab.append(p[1])
+        vocab.append(p[0].lower())
+        vocab.append(p[1].lower())
     vocab = list(set(vocab))
     for w in vocab:
         word_hypernyms[w] = nlp.read_hypernyms(w)

@@ -1,4 +1,4 @@
-#Optimization: C=1/2[ (w^* - \frac{1}{n} \sum_{j=1}^N s_j)^2 + \sum_{k=1}^N(s_j - s_j^*)^2]
+#Optimization2: C = 1/2 [ (w* - 1/n \sum_{j=1]^ns_j)^2 + \sum_{k=1}^n (s_j - s_j^*)^2
 import nlp_lib as nlp
 import numpy as np
 import scipy as sci
@@ -71,15 +71,20 @@ def test_sense_vectors():
             machine_score.append(m_score)
             human_score.append(float(p[2]))
     p_val, p_rel = sci.stats.spearmanr(human_score, machine_score)
-    print "Opt1 Approach", p_val
+    print "Opt2 Approach", p_val
 def cost_func(word, sense_vecs):
     result = 0.0
+    term1 = np.zeros(VECTOR_DIM)
+    term2 = 0.0
     for s in senses[word]:
-        dis = np.linalg.norm( word_pool[word] - sense_vecs[s] )
+        term1 = term1 + sense_vecs[s]
+        dis = np.linalg.norm(sense_vecs[s] - sense_pool[s])
         dis = np.power(dis,2)
-        dis1 = np.linalg.norm(sense_vecs[s] - sense_pool[s])
-        dis1 = np.power(dis1,2)
-        result = result + dis + dis1
+        term2 = term2 + dis
+    term1 = term1 /(1.0 * len(senses[word]) )
+    result = np.linalg.norm(word_pool[word] - term1)
+    result = np.power(result,2)
+    result = result + term2
     result = 0.5 * result
     return result
 if __name__ == "__main__":
