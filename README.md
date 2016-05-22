@@ -1,4 +1,13 @@
 # nlp
+CBOW: simple.py
+Sense Pooling: simple_linear.py
+Optimized Sense Pooling: opt1_linear_new.py
+Neural Network Model: NN_hidden.py
+
+
+
+
+
 For models and corpus, and some experimental files stored here.
 STEPS:
 0. Remove <doc id=....> and </doc> marks in documents.

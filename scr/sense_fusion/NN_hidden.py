@@ -9,7 +9,7 @@ VECTOR_DIR = "../test_vector/"
 VECTOR_NAME = "100_3.vec"
 VECTOR_DIM = 100
 L_RATE = 0.5
-epsilon = 1e-8
+epsilon = 1e-6
 word_hypernyms = {}
 word_hyponyms = {}
 word_synonyms = {}
@@ -51,7 +51,7 @@ def test_sense_vectors():
             human_score.append(float(p[2]))
 
     p_val, p_rel = sci.stats.spearmanr(human_score, machine_score)
-    print "NN Approach", p_val
+    print "NN Hidden Approach", p_val
 
 def cost_function(word):
     result = 0.0
@@ -130,6 +130,9 @@ def train_NN():
                     print "None of word",w,"'s related word in vector file,:("
                     jump_this_word = 1
                     break
+            hyper_num = len(para_v1[s])
+            syn_num = len(para_v2[s])
+            hypon_num = len(para_v3[s])
             para_u1[s] = np.random.randn(hyper_num)
             para_u2[s] = np.random.randn(syn_num)
             para_u3[s] = np.random.randn(hypon_num)
@@ -228,7 +231,7 @@ def train_NN():
                 para_u3[s] = para_u3[s] - L_RATE * 1.0/3.0 * grad_u3
                 i = i + 1
             pre_cost = cost
-            s_vecs = calc_NN(w, p_w = para_w, p_u = para_u, p_v = para_v, p_b = para_b)
+            s_vecs = calc_NN(w, p_u1 = para_u1, p_u2 = para_u2, p_u3 = para_u3,  p_v1 = para_v1, p_v2 = para_v2, p_v3 = para_v3, p_b1 = para_b1, p_b2 = para_b2, p_b3 = para_b3)
             for s in senses[w]:
                 sense_vectors[s] = s_vecs[s]
             cost = cost_function(w)

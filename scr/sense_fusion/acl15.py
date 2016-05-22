@@ -4,9 +4,9 @@ import numpy as np
 import scipy as sci
 
 CSV_DIR = "../../csv/"
-CSV_NAME = "WordSim353.csv"
+CSV_NAME = "M&C-30.csv"
 VECTOR_DIR = "../test_vector/"
-VECTOR_NAME = "100_6.vec.sense"
+VECTOR_NAME = "100_8.vec.sense"
 VECTOR_DIM = 100
 L_RATE = 0.5
 alpha = 1.0
@@ -49,18 +49,19 @@ def test_sense_vectors():
         for v1 in sense_vectors[w1]:
             for v2 in sense_vectors[w2]:
                     m_score = m_score + cos_function(v1 , v2)
-                    m_score = m_score / ( float( len(sense_vectors[w1] ) ) * float ( len(sense_vectors[w2])) )
+        m_score = m_score / ( float( len(sense_vectors[w1] ) ) * float ( len(sense_vectors[w2])) )
         machine_score.append(m_score)
         human_score.append(float(p[2]))
     p_val, p_rel = sci.stats.spearmanr(human_score, machine_score)
     print "ACL15 Approach", p_val
 if __name__ == "__main__":
+    print "Vec",VECTOR_NAME,"csv",CSV_NAME
     word_vectors = nlp.read_word_vectors(VECTOR_DIR + VECTOR_NAME)
     word_pairs = nlp.read_csv(CSV_DIR + CSV_NAME)
     vocab = []
     for p in word_pairs:
-        vocab.append(p[0])
-        vocab.append(p[1])
+        vocab.append(p[0].lower())
+        vocab.append(p[1].lower())
     vocab = list(set(vocab))
     for w in vocab:
         sense_vectors[w] = []

@@ -6,7 +6,7 @@ import scipy as sci
 CSV_DIR = "../../csv/"
 CSV_NAME = "M&C-30.csv"
 VECTOR_DIR = "../test_vector/"
-VECTOR_NAME = "100_6.vec"
+VECTOR_NAME = "100_8.vec"
 VECTOR_DIM = 100
 L_RATE = 0.5
 epsilon = 1e-11
