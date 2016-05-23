@@ -1,4 +1,12 @@
 # nlp
+Word Embeddings for testing:
+
+https://onedrive.live.com/redir?resid=4696410962B7B2D9!4108&authkey=!AGh3D_9fneXGYnI&ithint=file%2cgz
+
+Please use tool provided here to generate sense vectors for reproducting the RETRO model:
+
+https://github.com/sjauhar/SenseRetrofit
+
 
 All codes in my Essay could be found at:
 
