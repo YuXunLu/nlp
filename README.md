@@ -1,11 +1,18 @@
 # nlp
+
+All codes in my Essay could be found at:
+
+scr/sense_fusion/ folder.
+
+The models correspondent files are:
+
 CBOW: simple.py
 
-Sense Pooling: simple_linear.py
+Sense Pooling (SPM): simple_linear.py
 
-Optimized Sense Pooling: opt1_linear_new.py
+Optimized Sense Pooling (OSPM): opt1_linear_new.py
 
-Neural Network Model: NN_hidden.py
+Neural Network Model (NNOSPM): NN_hidden.py
 
 Word Vectors used in this model could be download at:
 
