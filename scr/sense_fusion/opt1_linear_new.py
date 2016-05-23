@@ -4,9 +4,9 @@ import numpy as np
 import scipy as sci
 
 CSV_DIR = "../../csv/"
-CSV_NAME = "M&C-30.csv"
+CSV_NAME = "R&G-65.csv"
 VECTOR_DIR = "../test_vector/"
-VECTOR_NAME = "100_8.vec"
+VECTOR_NAME = "100_3.vec"
 VECTOR_DIM = 100
 MAX_ITER = 20
 L_RATE = 0.005
