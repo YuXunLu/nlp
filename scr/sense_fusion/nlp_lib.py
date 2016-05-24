@@ -14,6 +14,16 @@ def get_single_pooling(word, rel_words, word_vectors, word_dim = 100):
     if ( i - 1.0 > 0.0):
         result = result / i
     return result
+def get_single_pooling_sense(sense, rel_sense, word_vectors, word_dim = 100):
+    i = 1.0
+    result = np.zeros(word_dim)
+    for w in rel_sense[sense]:
+        if ( word_vectors.has_key(w)):
+            result = result + word_vectors[w]
+            i = i + 1.0
+    if ( i - 1.0 > 0.0 ):
+        result = result / i
+    return result
 def get_pooling(word, word_hypernyms, word_synonyms, word_hyponyms, word_vectors, word_dim = 100):
     result = np.zeros(word_dim)
     if word_vectors.has_key(word):
